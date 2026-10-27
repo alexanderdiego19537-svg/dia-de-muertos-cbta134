@@ -1,0 +1,94 @@
+'use client';
+
+import { motion, useInView, AnimatePresence } from 'framer-motion';
+import { useRef, useState } from 'react';
+import Image from 'next/image';
+import { X, ZoomIn } from 'lucide-react';
+
+const photos = [
+  { src: '/images/catrina-candle.jpg', alt: 'Catrina con vela encendida — Día de Muertos', label: 'La llama que guía' },
+  { src: '/images/catrina-roses.jpg', alt: 'Catrina con rosas naranjas — tradición mexicana', label: 'Elegancia y misterio' },
+  { src: '/images/catrina-dress.jpg', alt: 'Catrina con vestido tradicional y flores — CBTA 134', label: 'La Catrina tradicional' },
+];
+
+export default function GallerySection() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const [selected, setSelected] = useState<typeof photos[0] | null>(null);
+
+  return (
+    <section id="galeria" style={{ padding: '96px 0', position: 'relative', overflow: 'hidden', backgroundColor: '#0F0606' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }} ref={ref}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={isInView ? { opacity: 1, y: 0 } : {}}
+          style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+          <div style={{ width: 48, height: 1, background: 'rgba(249,115,22,0.5)' }} />
+          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#F97316', letterSpacing: '0.3em', textTransform: 'uppercase' }}>Imágenes</span>
+        </motion.div>
+
+        <motion.h2 initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.1 }}
+          style={{ fontFamily: 'Cinzel, serif', fontWeight: 700, color: 'white', marginBottom: 10, lineHeight: 1.2, fontSize: 'clamp(28px, 4.5vw, 52px)' }}>
+          Galería<br />
+          <span style={{ background: 'linear-gradient(135deg, #F97316 0%, #EAB308 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Día de Muertos</span>
+        </motion.h2>
+        <motion.p initial={{ opacity: 0 }} animate={isInView ? { opacity: 1 } : {}} transition={{ delay: 0.2 }}
+          style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'rgba(255,255,255,0.32)', marginBottom: 44, maxWidth: 480, lineHeight: 1.7 }}>
+          Próximamente se añadirán fotografías del evento del 28 de octubre. Por ahora, disfruta de estas imágenes de inspiración.
+        </motion.p>
+
+        {/* Photo grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+          {photos.map((photo, i) => (
+            <motion.div key={photo.src}
+              initial={{ opacity: 0, scale: 0.95 }} animate={isInView ? { opacity: 1, scale: 1 } : {}} transition={{ delay: i * 0.12 }}
+              onClick={() => setSelected(photo)}
+              style={{ position: 'relative', height: 340, borderRadius: '20px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', boxShadow: '0 4px 30px rgba(0,0,0,0.5)' }}
+            >
+              <Image src={photo.src} alt={photo.alt} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" style={{ filter: 'brightness(0.82)', transition: 'transform 0.7s ease' }}
+                onMouseEnter={e => ((e.target as HTMLElement).style.transform = 'scale(1.06)')}
+                onMouseLeave={e => ((e.target as HTMLElement).style.transform = 'scale(1)')} />
+              {/* Hover overlay */}
+              <div style={{ position: 'absolute', inset: 0, background: 'rgba(10,4,4,0)', transition: 'background 0.3s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(10,4,4,0.45)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(10,4,4,0)')}>
+                <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(249,115,22,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.3s' }}
+                  onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+                  className="hover-zoom-btn">
+                  <ZoomIn size={18} style={{ color: 'white' }} />
+                </div>
+              </div>
+              {/* Label */}
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '14px 16px', background: 'linear-gradient(to top, rgba(10,4,4,0.88) 0%, transparent 100%)' }}>
+                <p style={{ color: 'white', fontSize: 13, fontWeight: 600 }}>{photo.label}</p>
+                <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>CBTA #134 — Tetlanhocan, Tlax.</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* Lightbox */}
+      <AnimatePresence>
+        {selected && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setSelected(null)}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.96)', zIndex: 50, backdropFilter: 'blur(16px)' }} />
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
+              style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, pointerEvents: 'none' }}>
+              <div style={{ position: 'relative', width: '100%', maxWidth: 800, pointerEvents: 'all' }}>
+                <button onClick={() => setSelected(null)}
+                  style={{ position: 'absolute', top: -16, right: -16, zIndex: 10, width: 36, height: 36, borderRadius: '50%', background: '#F97316', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                  <X size={16} style={{ color: 'white' }} />
+                </button>
+                <div style={{ position: 'relative', width: '100%', height: '70vh', borderRadius: '20px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <Image src={selected.src} alt={selected.alt} fill className="object-contain" />
+                </div>
+                <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'rgba(255,255,255,0.4)', textAlign: 'center', marginTop: 12 }}>{selected.alt}</p>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </section>
+  );
+}
