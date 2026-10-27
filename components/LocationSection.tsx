@@ -4,7 +4,9 @@ import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { MapPin, Navigation, Clock } from 'lucide-react';
 
-export default function LocationSection() {
+interface LocationSectionProps { standalone?: boolean; }
+
+export default function LocationSection({ standalone = false }: LocationSectionProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 

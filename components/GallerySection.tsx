@@ -11,7 +11,9 @@ const photos = [
   { src: '/images/catrina-dress.jpg', alt: 'Catrina con vestido tradicional y flores — CBTA 134', label: 'La Catrina tradicional' },
 ];
 
-export default function GallerySection() {
+interface GallerySectionProps { standalone?: boolean; showViewAll?: boolean; }
+
+export default function GallerySection({ standalone = false, showViewAll = false }: GallerySectionProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
   const [selected, setSelected] = useState<typeof photos[0] | null>(null);
@@ -89,6 +91,25 @@ export default function GallerySection() {
           </>
         )}
       </AnimatePresence>
+      {/* Botón Ver Galería Completa */}
+      {showViewAll && (
+        <div style={{ textAlign: 'center', marginTop: 40, paddingBottom: 16 }}>
+          <a href="/galeria/completa" style={{ textDecoration: 'none', display: 'inline-block' }}>
+            <div style={{
+              padding: 'clamp(11px,2vw,14px) clamp(24px,4vw,40px)',
+              borderRadius: 999,
+              background: 'linear-gradient(135deg, #F97316, #C2410C)',
+              color: 'white', border: 'none', cursor: 'pointer',
+              fontFamily: 'Cinzel, serif', fontWeight: 700,
+              fontSize: 'clamp(13px,2vw,15px)',
+              boxShadow: '0 4px 24px rgba(249,115,22,0.45)',
+              display: 'flex', alignItems: 'center', gap: 8,
+            }}>
+              Ver Galería Completa →
+            </div>
+          </a>
+        </div>
+      )}
     </section>
   );
 }

@@ -2,6 +2,8 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sparkles } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import CempasuchilLogo from './CempasuchilLogo';
 import Image from 'next/image';
 
@@ -13,103 +15,147 @@ interface NavMenuProps {
 }
 
 const navItems = [
-  { label: 'Inicio', tag: 'Hero' },
-  { label: 'Quiénes Somos', tag: 'Nuestra Institución' },
-  { label: 'El Evento', tag: 'Miércoles 28 de Octubre 2026' },
-  { label: 'Tradiciones', tag: 'Calendario del Más Allá' },
-  { label: 'Galería', tag: 'Fotografías' },
-  { label: 'Ubicación', tag: 'Cómo llegar' },
+  { label: 'Inicio',         tag: 'Página principal',              href: '/' },
+  { label: 'Quiénes Somos',  tag: 'Nuestra Institución',           href: '/quienes-somos' },
+  { label: 'Programa',       tag: 'Miércoles 28 de Octubre 2026',  href: '/programa' },
+  { label: 'Concurso',       tag: 'Concurso de Ofrendas',          href: '/concurso' },
+  { label: 'Galería',        tag: 'Fotografías',                   href: '/galeria' },
+  { label: 'Ubicación',      tag: 'Cómo llegar',                   href: '/ubicacion' },
 ];
 
 const glowOptions = [
-  { label: 'Cempasúchil', color: 'rgba(249, 115, 22, 0.5)' },
-  { label: 'Morado Místico', color: 'rgba(124, 58, 237, 0.5)' },
-  { label: 'Rojo Pasión', color: 'rgba(220, 38, 38, 0.5)' },
-  { label: 'Oro Ancestral', color: 'rgba(234, 179, 8, 0.5)' },
+  { label: 'Cempasúchil',   color: 'rgba(249,115,22,0.5)' },
+  { label: 'Morado Místico', color: 'rgba(124,58,237,0.5)' },
+  { label: 'Rojo Pasión',    color: 'rgba(220,38,38,0.5)' },
+  { label: 'Oro Ancestral',  color: 'rgba(234,179,8,0.5)' },
 ];
 
 export default function NavMenu({ isOpen, onClose, ambientColor, setAmbientColor }: NavMenuProps) {
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-      onClose();
-    }
-  };
+  const router = useRouter();
 
-  const sectionIds = ['inicio', 'quienes-somos', 'el-evento', 'tradiciones', 'galeria', 'ubicacion'];
+  const navigate = (href: string) => {
+    onClose();
+    router.push(href);
+  };
 
   return (
     <AnimatePresence>
       {isOpen && (
         <>
+          {/* Overlay */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/85 backdrop-blur-md z-50"
+            style={{
+              position: 'fixed', inset: 0,
+              background: 'rgba(0,0,0,0.88)',
+              backdropFilter: 'blur(12px)',
+              zIndex: 50,
+            }}
           />
+
+          {/* Drawer */}
           <motion.div
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 180 }}
-            className="fixed top-0 left-0 bottom-0 w-full max-w-md bg-black border-r z-50 p-8 md:p-12 flex flex-col justify-between overflow-y-auto"
-            style={{ borderColor: 'rgba(249,115,22,0.15)' }}
+            transition={{ type: 'spring', damping: 26, stiffness: 190 }}
+            style={{
+              position: 'fixed', top: 0, left: 0, bottom: 0,
+              width: '100%', maxWidth: 420,
+              backgroundColor: '#050205',
+              borderRight: '1px solid rgba(249,115,22,0.12)',
+              zIndex: 51,
+              display: 'flex', flexDirection: 'column',
+              justifyContent: 'space-between',
+              padding: 'clamp(24px,5vw,48px)',
+              overflowY: 'auto',
+            }}
           >
-            {/* Header */}
+            {/* Top */}
             <div>
-              <div className="flex items-center justify-between mb-10">
-                <div className="flex items-center gap-3">
-                  <CempasuchilLogo size={40} animated />
+              {/* Header row */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <CempasuchilLogo size={38} animated />
                   <div>
-                    <p className="font-display text-white font-bold tracking-wider text-sm">CBTA #134</p>
-                    <p className="font-mono text-orange-400/60 text-xs">Tetlanhocan, Tlax.</p>
+                    <p style={{ fontFamily: 'Cinzel, serif', color: 'white', fontWeight: 700, fontSize: 13, margin: 0, letterSpacing: '0.1em' }}>CBTA #134</p>
+                    <p style={{ fontFamily: 'JetBrains Mono, monospace', color: 'rgba(249,115,22,0.55)', fontSize: 11, margin: 0 }}>Tetlanhocan, Tlax.</p>
                   </div>
                 </div>
-                <button
-                  onClick={onClose}
-                  className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:border-orange-500/50 transition-all"
-                >
-                  <X size={18} />
+                <button onClick={onClose} style={{
+                  width: 38, height: 38, borderRadius: '50%',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  background: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'rgba(255,255,255,0.5)', cursor: 'pointer',
+                }}>
+                  <X size={17} />
                 </button>
               </div>
 
-              {/* Ambient color picker */}
-              <div className="mb-10 p-4 rounded-xl border border-white/5 bg-white/3">
-                <div className="flex items-center gap-2 mb-4">
-                  <Sparkles size={14} className="text-orange-400" style={{ animation: 'spin 6s linear infinite' }} />
-                  <p className="font-mono text-xs text-white/40 tracking-[0.2em] uppercase">Ambiente de color</p>
+              {/* Color ambiente */}
+              <div style={{
+                marginBottom: 32, padding: '14px 16px', borderRadius: 14,
+                border: '1px solid rgba(255,255,255,0.06)',
+                background: 'rgba(255,255,255,0.02)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                  <Sparkles size={13} color="#F97316" style={{ animation: 'spin 6s linear infinite' }} />
+                  <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.2em', textTransform: 'uppercase', margin: 0 }}>
+                    Ambiente de color
+                  </p>
                 </div>
-                <div className="flex gap-3">
+                <div style={{ display: 'flex', gap: 10 }}>
                   {glowOptions.map((opt) => (
                     <button
                       key={opt.label}
                       title={opt.label}
                       onClick={() => setAmbientColor(opt.color)}
-                      className={`w-8 h-8 rounded-full border-2 transition-all ${ambientColor === opt.color ? 'scale-110 border-white' : 'border-transparent opacity-60 hover:opacity-100'}`}
-                      style={{ background: opt.color.replace('0.5', '1') }}
+                      style={{
+                        width: 30, height: 30, borderRadius: '50%', cursor: 'pointer',
+                        background: opt.color.replace('0.5', '1'),
+                        border: ambientColor === opt.color ? '2.5px solid white' : '2px solid transparent',
+                        transform: ambientColor === opt.color ? 'scale(1.15)' : 'scale(1)',
+                        transition: 'all 0.2s',
+                        opacity: ambientColor === opt.color ? 1 : 0.55,
+                      }}
                     />
                   ))}
                 </div>
               </div>
 
-              {/* Navigation */}
-              <nav className="flex flex-col gap-1">
-                {navItems.map((item, index) => (
+              {/* Nav links */}
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {navItems.map((item, i) => (
                   <motion.button
-                    key={item.label}
-                    initial={{ opacity: 0, x: -20 }}
+                    key={item.href}
+                    initial={{ opacity: 0, x: -18 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.08 }}
-                    onClick={() => scrollToSection(sectionIds[index])}
-                    className="group flex flex-col items-start py-4 border-b border-white/5 hover:border-orange-500/20 transition-all text-left"
+                    transition={{ delay: i * 0.07 }}
+                    onClick={() => navigate(item.href)}
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
+                      padding: '14px 0',
+                      borderBottom: '1px solid rgba(255,255,255,0.05)',
+                      display: 'flex', flexDirection: 'column', gap: 2,
+                    }}
                   >
-                    <span className="text-3xl md:text-4xl font-display font-bold text-white/80 group-hover:text-white group-hover:translate-x-2 transition-all duration-300">
+                    <span style={{
+                      fontFamily: 'Cinzel, serif', fontWeight: 700,
+                      fontSize: 'clamp(22px,5vw,34px)',
+                      color: 'rgba(255,255,255,0.82)',
+                      transition: 'color 0.2s',
+                      lineHeight: 1.2,
+                    }}>
                       {item.label}
                     </span>
-                    <span className="font-mono text-xs text-orange-500/0 group-hover:text-orange-500/70 transition-all duration-300 mt-1">
+                    <span style={{
+                      fontFamily: 'JetBrains Mono, monospace',
+                      fontSize: 10, color: 'rgba(249,115,22,0)',
+                      transition: 'color 0.2s',
+                    }}>
                       // {item.tag}
                     </span>
                   </motion.button>
@@ -118,10 +164,10 @@ export default function NavMenu({ isOpen, onClose, ambientColor, setAmbientColor
             </div>
 
             {/* Footer */}
-            <div className="mt-8 pt-6 border-t border-white/5">
-              <Image src="/images/logo-cbta.png" alt="Logo CBTA 134" width={60} height={60} className="opacity-40 mb-4" />
-              <p className="font-mono text-xs text-white/30">© 2026 CBT Agropecuario #134</p>
-              <p className="font-mono text-xs text-white/20">Tetlanhocan, Tlaxcala, México</p>
+            <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+              <Image src="/images/logo-cbta.png" alt="Logo CBTA 134" width={52} height={52} style={{ opacity: 0.35, marginBottom: 12 }} />
+              <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(255,255,255,0.25)', margin: '0 0 4px' }}>© 2026 CBT Agropecuario #134</p>
+              <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(255,255,255,0.15)', margin: 0 }}>Tetlanhocan, Tlaxcala, México</p>
             </div>
           </motion.div>
         </>

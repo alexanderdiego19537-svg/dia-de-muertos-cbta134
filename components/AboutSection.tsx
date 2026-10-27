@@ -12,7 +12,9 @@ const stats = [
   { icon: Award, value: '#134', label: 'CBT Agropecuario' },
 ];
 
-export default function AboutSection() {
+interface AboutSectionProps { standalone?: boolean; }
+
+export default function AboutSection({ standalone = false }: AboutSectionProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
