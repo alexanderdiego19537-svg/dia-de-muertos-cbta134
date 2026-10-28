@@ -205,11 +205,12 @@ export default function HeroSection() {
           className="sm:hidden"
           style={{
             position: 'absolute',
-            top: '10%',
+            top: '8%',
             left: 0, right: 0,
             zIndex: 15,
             pointerEvents: 'none',
             textAlign: 'center',
+            padding: '0 12px',
           }}
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -243,9 +244,14 @@ export default function HeroSection() {
         </motion.div>
 
         {/* ── LAYER 2 · Catrina — centered, large, 3D tilt ── */}
+        {/* Desktop: pegada al fondo | Mobile: centrada verticalmente en el espacio disponible */}
         <div style={{
-          position: 'absolute', inset: 0,
-          display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+          position: 'absolute',
+          // Desktop: flex-end (pegada abajo) | Mobile: centrada entre el título y el bottom bar
+          top: 0, bottom: 0, left: 0, right: 0,
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'center',
           zIndex: 10, pointerEvents: 'none',
         }}>
           <motion.div
@@ -266,11 +272,12 @@ export default function HeroSection() {
               }} />
 
               {/* Catrina image — mix-blend-mode:screen removes black BG */}
+              {/* Mobile: ancho y alto más controlados para que esté cerca del título */}
               <div style={{
                 position: 'relative',
-                // En móvil la imagen es más pequeña para que quepa arriba del doblez
-                width: 'clamp(200px, 70vw, 560px)',
-                height: 'clamp(340px, 72vh, 850px)',
+                width: 'clamp(180px, 62vw, 560px)',
+                // Mobile: altura más pequeña para que no se aleje del título
+                height: 'clamp(300px, 52vh, 850px)',
                 zIndex: 1,
               }}>
                 <Image
