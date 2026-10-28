@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import CempasuchilLogo from './CempasuchilLogo';
 import Image from 'next/image';
 
@@ -14,13 +14,14 @@ interface NavMenuProps {
   setAmbientColor: (color: string) => void;
 }
 
+// href '#...' = scroll en home | href '/...' = página separada
 const navItems = [
-  { label: 'Inicio',         tag: 'Página principal',              href: '/' },
-  { label: 'Quiénes Somos',  tag: 'Nuestra Institución',           href: '/quienes-somos' },
-  { label: 'Programa',       tag: 'Miércoles 28 de Octubre 2026',  href: '/programa' },
-  { label: 'Concurso',       tag: 'Concurso de Ofrendas',          href: '/concurso' },
-  { label: 'Galería',        tag: 'Fotografías',                   href: '/galeria' },
-  { label: 'Ubicación',      tag: 'Cómo llegar',                   href: '/ubicacion' },
+  { label: 'Inicio',        tag: 'Página principal',             href: '/',          anchor: true },
+  { label: 'Quiénes Somos', tag: 'Nuestra Institución',          href: '/#quienes-somos', anchor: true },
+  { label: 'Programa',      tag: 'Miércoles 28 de Octubre 2026', href: '/programa',  anchor: false },
+  { label: 'Concurso',      tag: 'Concurso de Ofrendas',         href: '/concurso',  anchor: false },
+  { label: 'Galería',       tag: 'Fotografías',                  href: '/#galeria',  anchor: true },
+  { label: 'Ubicación',     tag: 'Cómo llegar',                  href: '/#ubicacion',anchor: true },
 ];
 
 const glowOptions = [
@@ -31,11 +32,29 @@ const glowOptions = [
 ];
 
 export default function NavMenu({ isOpen, onClose, ambientColor, setAmbientColor }: NavMenuProps) {
-  const router = useRouter();
+  const router   = useRouter();
+  const pathname = usePathname();
 
-  const navigate = (href: string) => {
+  const navigate = (item: typeof navItems[0]) => {
     onClose();
-    router.push(href);
+    if (!item.anchor) {
+      // Página separada
+      router.push(item.href);
+    } else {
+      // Scroll en la home
+      if (pathname !== '/') {
+        // Si no estamos en home, ir a home primero y luego scroll
+        router.push(item.href);
+      } else {
+        const id = item.href.replace('/#', '').replace('/', '');
+        if (id === '') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          const el = document.getElementById(id);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    }
   };
 
   return (
@@ -134,30 +153,35 @@ export default function NavMenu({ isOpen, onClose, ambientColor, setAmbientColor
                     initial={{ opacity: 0, x: -18 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.07 }}
-                    onClick={() => navigate(item.href)}
+                    onClick={() => navigate(item)}
                     style={{
                       background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
-                      padding: '14px 0',
+                      padding: '13px 0',
                       borderBottom: '1px solid rgba(255,255,255,0.05)',
-                      display: 'flex', flexDirection: 'column', gap: 2,
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     }}
                   >
-                    <span style={{
-                      fontFamily: 'Cinzel, serif', fontWeight: 700,
-                      fontSize: 'clamp(22px,5vw,34px)',
-                      color: 'rgba(255,255,255,0.82)',
-                      transition: 'color 0.2s',
-                      lineHeight: 1.2,
-                    }}>
-                      {item.label}
-                    </span>
-                    <span style={{
-                      fontFamily: 'JetBrains Mono, monospace',
-                      fontSize: 10, color: 'rgba(249,115,22,0)',
-                      transition: 'color 0.2s',
-                    }}>
-                      // {item.tag}
-                    </span>
+                    <div>
+                      <span style={{
+                        fontFamily: 'Cinzel, serif', fontWeight: 700,
+                        fontSize: 'clamp(20px,4.5vw,30px)',
+                        color: 'rgba(255,255,255,0.85)',
+                        lineHeight: 1.2, display: 'block',
+                      }}>
+                        {item.label}
+                      </span>
+                      <span style={{
+                        fontFamily: 'JetBrains Mono, monospace',
+                        fontSize: 10, color: 'rgba(249,115,22,0.45)',
+                      }}>
+                        {item.tag}
+                      </span>
+                    </div>
+                    {!item.anchor && (
+                      <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(249,115,22,0.5)', padding: '3px 8px', borderRadius: 999, border: '1px solid rgba(249,115,22,0.3)', background: 'rgba(249,115,22,0.06)' }}>
+                        ↗ página
+                      </span>
+                    )}
                   </motion.button>
                 ))}
               </nav>

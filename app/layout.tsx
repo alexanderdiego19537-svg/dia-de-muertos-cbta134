@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import PetalRain from "@/components/PetalRain";
 
 export const metadata: Metadata = {
   title: "Día de Muertos 2026 — CBTA #134 Tetlanhocan, Tlaxcala",
@@ -31,6 +32,8 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body style={{ backgroundColor: "#080208", color: "white", margin: 0, padding: 0 }}>
+        {/* Petales de cempasúchil — toda la app, pointer-events:none, no tapa nada */}
+        <PetalRain count={38} />
         {children}
       </body>
     </html>
