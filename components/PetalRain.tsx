@@ -51,17 +51,6 @@ export default function PetalRain({ count = 38 }: { count?: number }) {
 
   return (
     <>
-      <style>{`
-        @keyframes petal-fall {
-          0%   { transform: translateY(-70px) translateX(0px)           rotate(var(--r0)); opacity: 0; }
-          6%   { opacity: var(--op); }
-          40%  { transform: translateY(40vh)  translateX(var(--sw))     rotate(var(--r1)); }
-          60%  { transform: translateY(62vh)  translateX(calc(var(--sw) * -.4)) rotate(var(--r2)); }
-          88%  { opacity: var(--op); }
-          100% { transform: translateY(108vh) translateX(calc(var(--sw) * .7)) rotate(var(--r3)); opacity: 0; }
-        }
-      `}</style>
-
       <div
         aria-hidden
         style={{

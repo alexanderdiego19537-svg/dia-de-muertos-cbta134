@@ -20,6 +20,7 @@ const navItems = [
   { label: 'Quiénes Somos', tag: 'Nuestra Institución',          href: '/#quienes-somos', anchor: true },
   { label: 'Programa',      tag: 'Miércoles 28 de Octubre 2026', href: '/programa',  anchor: false },
   { label: 'Concurso',      tag: 'Concurso de Ofrendas',         href: '/concurso',  anchor: false },
+  { label: 'Evento',        tag: 'Fotos y Videos del Festival',  href: '/evento',    anchor: false },
   { label: 'Galería',       tag: 'Fotografías',                  href: '/#galeria',  anchor: true },
   { label: 'Ubicación',     tag: 'Cómo llegar',                  href: '/#ubicacion',anchor: true },
 ];
