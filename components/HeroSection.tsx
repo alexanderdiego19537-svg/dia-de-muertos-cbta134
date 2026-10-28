@@ -243,17 +243,19 @@ export default function HeroSection() {
           }}>MUERTOS</h1>
         </motion.div>
 
-        {/* ── LAYER 2 · Catrina — centered, large, 3D tilt ── */}
-        {/* Desktop: pegada al fondo | Mobile: centrada verticalmente en el espacio disponible */}
-        <div style={{
-          position: 'absolute',
-          // Desktop: flex-end (pegada abajo) | Mobile: centrada entre el título y el bottom bar
-          top: 0, bottom: 0, left: 0, right: 0,
-          display: 'flex',
-          alignItems: 'flex-end',
-          justifyContent: 'center',
-          zIndex: 10, pointerEvents: 'none',
-        }}>
+        {/* ── LAYER 2 · Catrina ── */}
+        {/* Desktop: flex-end (pegada al fondo) | Mobile: posición absoluta centrada */}
+        <div
+          className="catrina-wrapper"
+          style={{
+            position: 'absolute',
+            top: 0, bottom: 0, left: 0, right: 0,
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+            zIndex: 10, pointerEvents: 'none',
+          }}
+        >
           <motion.div
             style={{ rotateY, rotateX, perspective: 1000, transformStyle: 'preserve-3d' }}
             initial={{ opacity: 0, scale: 0.9, y: 50 }}
@@ -272,14 +274,15 @@ export default function HeroSection() {
               }} />
 
               {/* Catrina image — mix-blend-mode:screen removes black BG */}
-              {/* Mobile: ancho y alto más controlados para que esté cerca del título */}
-              <div style={{
-                position: 'relative',
-                width: 'clamp(180px, 62vw, 560px)',
-                // Mobile: altura más pequeña para que no se aleje del título
-                height: 'clamp(300px, 52vh, 850px)',
-                zIndex: 1,
-              }}>
+              <div
+                className="catrina-img-box"
+                style={{
+                  position: 'relative',
+                  width: 'clamp(200px, 55vw, 560px)',
+                  height: 'clamp(340px, 65vh, 850px)',
+                  zIndex: 1,
+                }}
+              >
                 <Image
                   src="/images/catrina-candle.jpg"
                   alt="Catrina con vela — Día de Muertos CBTA #134 Tetlanhocan"

@@ -118,6 +118,27 @@ html { scroll-behavior: smooth; }
 
 * { box-sizing: border-box; }
 
+/* ══════════════════════════════════════════
+   CATRINA — posición en móvil
+   En desktop queda flex-end (pegada al fondo).
+   En móvil la centramos verticalmente entre
+   el título (top ~38%) y el bottom bar (~20%).
+══════════════════════════════════════════ */
+@media (max-width: 639px) {
+  .catrina-wrapper {
+    align-items: center !important;
+    /* empujar hacia abajo del título y arriba del bottom bar */
+    padding-top: 38% !important;
+    padding-bottom: 18% !important;
+  }
+  .catrina-img-box {
+    width: clamp(190px, 72vw, 340px) !important;
+    height: clamp(260px, 44vh, 420px) !important;
+  }
+}
+
+* { box-sizing: border-box; }
+
 ::selection {
   background: rgba(249,115,22,0.4);
   color: white;
