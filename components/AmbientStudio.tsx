@@ -31,7 +31,22 @@ export default function AmbientStudio({ ambientColor, setAmbientColor, glowSize,
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3">
+    /* z-50 para que siempre quede encima en móvil */
+    <div
+      style={{
+        position: 'fixed',
+        bottom: 24,
+        right: 24,
+        zIndex: 50,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-end',
+        gap: 12,
+        // Asegurar que el touch funcione en esta zona
+        pointerEvents: 'auto',
+        touchAction: 'auto',
+      }}
+    >
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -42,17 +57,24 @@ export default function AmbientStudio({ ambientColor, setAmbientColor, glowSize,
             style={{
               padding: '20px',
               borderRadius: '16px',
-              width: '250px',
+              // En móvil limitamos el ancho para que no se salga de pantalla
+              width: 'min(250px, calc(100vw - 48px))',
               border: '1px solid rgba(255,255,255,0.08)',
               background: 'rgba(10,4,4,0.97)',
               backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              // Evitar que el panel se salga por la derecha en móvil pequeño
+              maxWidth: 'calc(100vw - 48px)',
+              // Permitir scroll/touch dentro del panel
+              touchAction: 'auto',
+              pointerEvents: 'auto',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
                 Ambiente
               </span>
-              <button onClick={reset} style={{ color: 'rgba(255,255,255,0.25)', cursor: 'pointer', background: 'none', border: 'none' }}>
+              <button onClick={reset} style={{ color: 'rgba(255,255,255,0.25)', cursor: 'pointer', background: 'none', border: 'none', padding: 6, touchAction: 'manipulation' }}>
                 <RefreshCw size={12} />
               </button>
             </div>
@@ -65,13 +87,16 @@ export default function AmbientStudio({ ambientColor, setAmbientColor, glowSize,
                   title={opt.label}
                   onClick={() => setAmbientColor(opt.color)}
                   style={{
-                    width: 28, height: 28, borderRadius: '50%',
+                    width: 32, height: 32, borderRadius: '50%',
                     backgroundColor: opt.hex,
                     border: ambientColor === opt.color ? '2px solid white' : '2px solid transparent',
                     transform: ambientColor === opt.color ? 'scale(1.15)' : 'scale(1)',
                     opacity: ambientColor === opt.color ? 1 : 0.55,
                     cursor: 'pointer',
                     transition: 'all 0.2s',
+                    // Importante para touch en móvil
+                    touchAction: 'manipulation',
+                    WebkitTapHighlightColor: 'transparent',
                   }}
                 />
               ))}
@@ -80,14 +105,20 @@ export default function AmbientStudio({ ambientColor, setAmbientColor, glowSize,
             <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', color: 'rgba(255,255,255,0.25)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
               Tamaño <span style={{ color: '#F97316' }}>{glowSize}%</span>
             </p>
-            <input type="range" min={40} max={150} value={glowSize} onChange={(e) => setGlowSize(Number(e.target.value))}
-              style={{ width: '100%', marginBottom: '12px', accentColor: '#F97316', height: '4px' }} />
+            <input
+              type="range" min={40} max={150} value={glowSize}
+              onChange={(e) => setGlowSize(Number(e.target.value))}
+              style={{ width: '100%', marginBottom: '12px', accentColor: '#F97316', height: '4px', touchAction: 'none', cursor: 'pointer' }}
+            />
 
             <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', color: 'rgba(255,255,255,0.25)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
               Intensidad <span style={{ color: '#F97316' }}>{glowIntensity.toFixed(1)}x</span>
             </p>
-            <input type="range" min={0.5} max={2.0} step={0.1} value={glowIntensity} onChange={(e) => setGlowIntensity(Number(e.target.value))}
-              style={{ width: '100%', accentColor: '#F97316', height: '4px' }} />
+            <input
+              type="range" min={0.5} max={2.0} step={0.1} value={glowIntensity}
+              onChange={(e) => setGlowIntensity(Number(e.target.value))}
+              style={{ width: '100%', accentColor: '#F97316', height: '4px', touchAction: 'none', cursor: 'pointer' }}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -104,6 +135,10 @@ export default function AmbientStudio({ ambientColor, setAmbientColor, glowSize,
           transition: 'all 0.2s',
           boxShadow: isOpen ? '0 0 20px rgba(249,115,22,0.5)' : 'none',
           backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          // Asegurar que el toque funcione bien en móvil
+          touchAction: 'manipulation',
+          WebkitTapHighlightColor: 'transparent',
         }}
       >
         <Sliders size={18} />

@@ -77,7 +77,7 @@ export default function HeroSection() {
         onMouseMove={handleMouseMove}
         style={{
           position: 'relative',
-          height: '100vh',
+          height: '100dvh',
           minHeight: 600,
           overflow: 'hidden',
           display: 'flex',
@@ -112,8 +112,14 @@ export default function HeroSection() {
           }} />
         </div>
 
-        {/* ── LAYER 1a · DÍA + DE LOS — BEHIND catrina (z=5) ── */}
+        {/* ══════════════════════════════════════════════════════════
+            TÍTULO — Desktop: dividido DÍA / DE / MUERTOS con catrina
+                     Mobile: stack vertical centrado arriba de catrina
+        ══════════════════════════════════════════════════════════ */}
+
+        {/* ── DESKTOP LAYER 1a · DÍA + DE — BEHIND catrina (z=5) ── */}
         <motion.div
+          className="hidden sm:block"
           style={{
             position: 'absolute',
             top: '11%', left: 0, right: 0,
@@ -145,7 +151,7 @@ export default function HeroSection() {
                 }}>DÍA</h1>
               </div>
 
-              {/* RIGHT — DE LOS (detrás de catrina) */}
+              {/* RIGHT — DE (detrás de catrina) */}
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: '0.2em', color: 'rgba(249,115,22,0.5)', marginBottom: 4, textTransform: 'uppercase' }}>CBTA #134</div>
                 <h1 style={{
@@ -154,14 +160,15 @@ export default function HeroSection() {
                   fontSize: 'clamp(38px, 7vw, 100px)',
                   color: 'white',
                   textShadow: '0 0 40px rgba(249,115,22,0.2), 0 2px 0 rgba(0,0,0,0.6)',
-                }}>DE LOS</h1>
+                }}>DE</h1>
               </div>
             </div>
           </div>
         </motion.div>
 
-        {/* ── LAYER 1b · MUERTOS — ENCIMA de catrina (z=15) ── */}
+        {/* ── DESKTOP LAYER 1b · MUERTOS — ENCIMA de catrina (z=15) ── */}
         <motion.div
+          className="hidden sm:block"
           style={{
             position: 'absolute',
             top: '11%', left: 0, right: 0,
@@ -175,11 +182,11 @@ export default function HeroSection() {
         >
           <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px' }}>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              {/* Spacer para alinear con "DE LOS" */}
+              {/* Spacer para alinear con "DE" */}
               <div style={{ textAlign: 'right' }}>
-                {/* Espacio equivalente al label + "DE LOS" */}
+                {/* Espacio equivalente al label + "DE" */}
                 <div style={{ visibility: 'hidden', fontFamily: 'JetBrains Mono, monospace', fontSize: 11 }}>CBTA #134</div>
-                <div style={{ visibility: 'hidden', fontSize: 'clamp(38px, 7vw, 100px)', lineHeight: 1 }}>DE LOS</div>
+                <div style={{ visibility: 'hidden', fontSize: 'clamp(38px, 7vw, 100px)', lineHeight: 1 }}>DE</div>
                 <h1 style={{
                   fontFamily: 'Cinzel, serif', fontWeight: 900, margin: 0,
                   lineHeight: 0.92, letterSpacing: '-0.02em',
@@ -191,6 +198,48 @@ export default function HeroSection() {
               </div>
             </div>
           </div>
+        </motion.div>
+
+        {/* ── MOBILE LAYER · Título centrado arriba (z=15) ── */}
+        <motion.div
+          className="sm:hidden"
+          style={{
+            position: 'absolute',
+            top: '10%',
+            left: 0, right: 0,
+            zIndex: 15,
+            pointerEvents: 'none',
+            textAlign: 'center',
+          }}
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.2 }}
+        >
+          <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '0.25em', color: 'rgba(249,115,22,0.6)', marginBottom: 6, textTransform: 'uppercase' }}>
+            CBTA #134 · 2026
+          </div>
+          <h1 style={{
+            fontFamily: 'Cinzel, serif', fontWeight: 900, margin: 0,
+            lineHeight: 0.88, letterSpacing: '-0.02em',
+            fontSize: 'clamp(56px, 18vw, 110px)',
+            color: 'white',
+            textShadow: '0 0 40px rgba(249,115,22,0.4), 0 2px 0 rgba(0,0,0,0.6)',
+          }}>DÍA</h1>
+          <h2 style={{
+            fontFamily: 'Cinzel, serif', fontWeight: 700, margin: '2px 0',
+            lineHeight: 1, letterSpacing: '0.05em',
+            fontSize: 'clamp(22px, 7vw, 44px)',
+            color: 'rgba(255,255,255,0.75)',
+            textShadow: '0 0 20px rgba(249,115,22,0.3)',
+          }}>DE</h2>
+          <h1 style={{
+            fontFamily: 'Cinzel, serif', fontWeight: 900, margin: 0,
+            lineHeight: 0.92, letterSpacing: '-0.02em',
+            fontSize: 'clamp(42px, 13vw, 86px)',
+            color: 'white',
+            textShadow: '0 0 60px rgba(249,115,22,0.6), 0 0 20px rgba(249,115,22,0.4), 0 2px 0 rgba(0,0,0,0.8)',
+            filter: 'drop-shadow(0 0 14px rgba(249,115,22,0.5))',
+          }}>MUERTOS</h1>
         </motion.div>
 
         {/* ── LAYER 2 · Catrina — centered, large, 3D tilt ── */}
@@ -219,15 +268,16 @@ export default function HeroSection() {
               {/* Catrina image — mix-blend-mode:screen removes black BG */}
               <div style={{
                 position: 'relative',
-                width: 'clamp(280px, 38vw, 560px)',
-                height: 'clamp(480px, 80vh, 850px)',
+                // En móvil la imagen es más pequeña para que quepa arriba del doblez
+                width: 'clamp(200px, 70vw, 560px)',
+                height: 'clamp(340px, 72vh, 850px)',
                 zIndex: 1,
               }}>
                 <Image
                   src="/images/catrina-candle.jpg"
                   alt="Catrina con vela — Día de Muertos CBTA #134 Tetlanhocan"
                   fill
-                  sizes="(max-width: 768px) 280px, (max-width: 1200px) 38vw, 560px"
+                  sizes="(max-width: 640px) 70vw, (max-width: 1200px) 38vw, 560px"
                   className="object-contain object-bottom"
                   priority
                   loading="eager"
@@ -251,94 +301,173 @@ export default function HeroSection() {
         </div>
 
         {/* ── LAYER 4 · Bottom info blocks ── */}
+        {/* Desktop: grid 3 columnas | Mobile: stack vertical */}
         <div style={{
           position: 'absolute', bottom: 0, left: 0, right: 0,
           zIndex: 20,
           maxWidth: 1280, margin: '0 auto', width: '100%',
-          padding: '0 32px 24px',
-          display: 'grid',
-          gridTemplateColumns: '1fr auto 1fr',
-          gap: 0,
-          alignItems: 'end',
+          padding: '0 16px 16px',
         }}>
-          {/* Left info */}
+          {/* Desktop layout */}
+          <div className="hidden sm:grid" style={{
+            gridTemplateColumns: '1fr auto 1fr',
+            gap: 0,
+            alignItems: 'end',
+            padding: '0 16px',
+          }}>
+            {/* Left info */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9, duration: 0.7 }}
+            >
+              {/* Event badge */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, width: 'fit-content', padding: '5px 12px', borderRadius: 999, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)' }}>
+                <span style={{ fontSize: 14 }}>💀</span>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'rgba(255,255,255,0.65)', letterSpacing: '0.1em' }}>Evento Cultural 2026</span>
+                <span style={{ fontSize: 12 }}>⭐</span>
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+                  <span style={{ fontFamily: 'Cinzel, serif', fontWeight: 800, color: 'white', lineHeight: 1, textTransform: 'uppercase', fontSize: 'clamp(22px, 3vw, 46px)', textShadow: '0 2px 12px rgba(0,0,0,0.9)' }}>Celebra</span>
+                  <span style={{ fontFamily: 'Cinzel, serif', fontWeight: 800, color: '#F97316', lineHeight: 1, fontSize: 'clamp(22px, 3vw, 46px)', filter: 'drop-shadow(0 0 8px rgba(249,115,22,0.7))' }}>›</span>
+                </div>
+                <div style={{ fontFamily: 'Cinzel, serif', fontWeight: 800, color: 'white', lineHeight: 1, textTransform: 'uppercase', fontSize: 'clamp(22px, 3vw, 46px)', textShadow: '0 2px 12px rgba(0,0,0,0.9)' }}>la Tradición</div>
+                <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '0.2em', color: 'rgba(249,115,22,0.6)', marginTop: 6 }}>(Desplázate para explorar)</p>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button onClick={() => setIsEventOpen(true)} style={{
+                  padding: '10px 20px', borderRadius: 999, fontFamily: 'Cinzel, serif', fontWeight: 700, fontSize: 13,
+                  color: 'white', border: 'none', cursor: 'pointer',
+                  background: 'linear-gradient(135deg, #F97316, #C2410C)',
+                  boxShadow: '0 4px 20px rgba(249,115,22,0.45)',
+                }}>Ver Programa</button>
+                <button onClick={() => setIsChatOpen(true)} style={{
+                  padding: '10px 16px', borderRadius: 999, fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
+                  color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.15)',
+                  background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', cursor: 'pointer',
+                }}>Más Info →</button>
+              </div>
+            </motion.div>
+
+            {/* Center scroll arrow */}
+            <motion.button
+              onClick={scrollDown}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4 }}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                color: 'rgba(255,255,255,0.35)', padding: '0 40px 8px',
+              }}
+            >
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase' }}>scroll</span>
+              <motion.div animate={{ y: [0, 5, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}>
+                <ChevronDown size={18} style={{ color: '#F97316' }} />
+              </motion.div>
+            </motion.button>
+
+            {/* Right info */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.1, duration: 0.7 }}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12 }}
+            >
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, maxWidth: 300, textAlign: 'right', fontWeight: 300, textShadow: '0 2px 8px rgba(0,0,0,0.8)', margin: 0 }}>
+                El CBTA #134 de Tetlanhocan te invita a una experiencia cultural única, honrando nuestras raíces y tradiciones.
+              </p>
+
+              <div style={{ padding: '16px 18px', borderRadius: 18, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(14px)', display: 'flex', flexDirection: 'column', gap: 10, minWidth: 260 }}>
+                {[
+                  { icon: Calendar, color: '#F97316', bg: 'rgba(249,115,22,0.14)', title: 'Mié. 28 de Octubre, 2026', sub: '8:00 AM — 1:00 PM' },
+                  { icon: MapPin, color: '#A78BFA', bg: 'rgba(167,139,250,0.14)', title: 'Auditorio de Aquiahuac', sub: 'San Fco. Tetlanhocan, Tlax.' },
+                ].map(({ icon: Icon, color, bg, title, sub }) => (
+                  <div key={title} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Icon size={14} style={{ color }} />
+                    </div>
+                    <div>
+                      <p style={{ color: 'white', fontSize: 13, fontWeight: 600, margin: 0, textShadow: '0 2px 6px rgba(0,0,0,0.7)' }}>{title}</p>
+                      <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{sub}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* ── MOBILE bottom bar ── */}
           <motion.div
+            className="sm:hidden"
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9, duration: 0.7 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 10,
+              padding: '0 4px 8px',
+            }}
           >
-            {/* Event badge */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, width: 'fit-content', padding: '5px 12px', borderRadius: 999, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)' }}>
-              <span style={{ fontSize: 14 }}>💀</span>
-              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'rgba(255,255,255,0.65)', letterSpacing: '0.1em' }}>Evento Cultural 2026</span>
-              <span style={{ fontSize: 12 }}>⭐</span>
+            {/* Fecha y lugar compactos */}
+            <div style={{
+              padding: '10px 14px',
+              borderRadius: 14,
+              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'rgba(0,0,0,0.6)',
+              backdropFilter: 'blur(14px)',
+              display: 'flex',
+              gap: 14,
+              width: '100%',
+              justifyContent: 'center',
+            }}>
+              {[
+                { icon: Calendar, color: '#F97316', bg: 'rgba(249,115,22,0.14)', title: 'Mié. 28 Oct. 2026', sub: '8:00 AM — 1:00 PM' },
+                { icon: MapPin, color: '#A78BFA', bg: 'rgba(167,139,250,0.14)', title: 'Auditorio Aquiahuac', sub: 'Tetlanhocan, Tlax.' },
+              ].map(({ icon: Icon, color, bg, title, sub }) => (
+                <div key={title} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Icon size={12} style={{ color }} />
+                  </div>
+                  <div>
+                    <p style={{ color: 'white', fontSize: 11, fontWeight: 600, margin: 0 }}>{title}</p>
+                    <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: 'rgba(255,255,255,0.4)', margin: '1px 0 0' }}>{sub}</p>
+                  </div>
+                </div>
+              ))}
             </div>
 
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-                <span style={{ fontFamily: 'Cinzel, serif', fontWeight: 800, color: 'white', lineHeight: 1, textTransform: 'uppercase', fontSize: 'clamp(22px, 3vw, 46px)', textShadow: '0 2px 12px rgba(0,0,0,0.9)' }}>Celebra</span>
-                <span style={{ fontFamily: 'Cinzel, serif', fontWeight: 800, color: '#F97316', lineHeight: 1, fontSize: 'clamp(22px, 3vw, 46px)', filter: 'drop-shadow(0 0 8px rgba(249,115,22,0.7))' }}>›</span>
-              </div>
-              <div style={{ fontFamily: 'Cinzel, serif', fontWeight: 800, color: 'white', lineHeight: 1, textTransform: 'uppercase', fontSize: 'clamp(22px, 3vw, 46px)', textShadow: '0 2px 12px rgba(0,0,0,0.9)' }}>la Tradición</div>
-              <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '0.2em', color: 'rgba(249,115,22,0.6)', marginTop: 6 }}>(Desplázate para explorar)</p>
-            </div>
-
-            <div style={{ display: 'flex', gap: 10 }}>
+            {/* Botones */}
+            <div style={{ display: 'flex', gap: 8, width: '100%' }}>
               <button onClick={() => setIsEventOpen(true)} style={{
-                padding: '10px 20px', borderRadius: 999, fontFamily: 'Cinzel, serif', fontWeight: 700, fontSize: 13,
+                flex: 1, padding: '11px 0', borderRadius: 999,
+                fontFamily: 'Cinzel, serif', fontWeight: 700, fontSize: 13,
                 color: 'white', border: 'none', cursor: 'pointer',
                 background: 'linear-gradient(135deg, #F97316, #C2410C)',
                 boxShadow: '0 4px 20px rgba(249,115,22,0.45)',
               }}>Ver Programa</button>
               <button onClick={() => setIsChatOpen(true)} style={{
-                padding: '10px 16px', borderRadius: 999, fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
+                flex: 1, padding: '11px 0', borderRadius: 999,
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
                 color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.15)',
                 background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', cursor: 'pointer',
               }}>Más Info →</button>
             </div>
-          </motion.div>
 
-          {/* Center scroll arrow */}
-          <motion.button
-            onClick={scrollDown}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4 }}
-            style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-              color: 'rgba(255,255,255,0.35)', padding: '0 40px 8px',
-            }}
-          >
-            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase' }}>scroll</span>
-            <motion.div animate={{ y: [0, 5, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}>
-              <ChevronDown size={18} style={{ color: '#F97316' }} />
-            </motion.div>
-          </motion.button>
-
-          {/* Right info */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.1, duration: 0.7 }}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12 }}
-          >
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, maxWidth: 300, textAlign: 'right', fontWeight: 300, textShadow: '0 2px 8px rgba(0,0,0,0.8)', margin: 0 }}>
-              El CBTA #134 de Tetlanhocan te invita a una experiencia cultural única, honrando nuestras raíces y tradiciones.
-            </p>
-
-            <div style={{ padding: '16px 18px', borderRadius: 18, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(14px)', display: 'flex', flexDirection: 'column', gap: 10, minWidth: 260 }}>
-              {[
-                { icon: Calendar, color: '#F97316', bg: 'rgba(249,115,22,0.14)', title: 'Mié. 28 de Octubre, 2026', sub: '8:00 AM — 1:00 PM' },
-                { icon: MapPin, color: '#A78BFA', bg: 'rgba(167,139,250,0.14)', title: 'Auditorio de Aquiahuac', sub: 'San Fco. Tetlanhocan, Tlax.' },
-              ].map(({ icon: Icon, color, bg, title, sub }) => (
-                <div key={title} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Icon size={14} style={{ color }} />
-                  </div>
-                  <div>
-                    <p style={{ color: 'white', fontSize: 13, fontWeight: 600, margin: 0, textShadow: '0 2px 6px rgba(0,0,0,0.7)' }}>{title}</p>
-                    <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{sub}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {/* Scroll indicator */}
+            <motion.button
+              onClick={scrollDown}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                color: 'rgba(255,255,255,0.35)', padding: 0,
+              }}
+            >
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 8, letterSpacing: '0.2em', textTransform: 'uppercase' }}>scroll</span>
+              <motion.div animate={{ y: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}>
+                <ChevronDown size={16} style={{ color: '#F97316' }} />
+              </motion.div>
+            </motion.button>
           </motion.div>
         </div>
 

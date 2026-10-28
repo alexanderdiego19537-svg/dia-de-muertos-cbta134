@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 
+// Paleta naranja cempasúchil — colores directamente en el SVG fill
 const COLORS = [
-  '#F97316', '#EAB308', '#FB923C',
-  '#FDE047', '#FDBA74', '#FCD34D',
+  '#F97316', '#EA6C00', '#FB923C',
+  '#F97A1A', '#F17F05', '#FF8C00',
+  '#E8650A', '#FFA040',
 ];
 
 interface Petal {
@@ -31,18 +33,20 @@ function makePetals(count: number): Petal[] {
     sway:        50 + Math.random() * 90,
     rotate:      Math.random() * 360,
     rotateDelta: 160 + Math.random() * 360,
-    opacity:     0.3 + Math.random() * 0.45,
+    opacity:     0.55 + Math.random() * 0.4,
   }));
 }
 
-// SVG inline de pétalo — se embebe como background-image
-const PETAL = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 32'><ellipse cx='9' cy='16' rx='7.5' ry='15.5' fill='white'/></svg>`;
-const PETAL_URL = `url("data:image/svg+xml,${encodeURIComponent(PETAL)}")`;
+// Genera un SVG con el color naranja directamente en el fill (no filtros)
+function makePetalUrl(color: string) {
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 32'><ellipse cx='9' cy='16' rx='7.5' ry='15.5' fill='${color}'/></svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
 
 export default function PetalRain({ count = 38 }: { count?: number }) {
   const [petals, setPetals] = useState<Petal[]>([]);
 
-  // Genera los petales solo en el cliente (evita hydration mismatch)
+  // Genera los pétalos solo en el cliente (evita hydration mismatch)
   useEffect(() => {
     setPetals(makePetals(count));
   }, [count]);
@@ -70,15 +74,11 @@ export default function PetalRain({ count = 38 }: { count?: number }) {
               left: `${p.left}%`,
               width:  p.size,
               height: p.size * 1.8,
-              backgroundImage: PETAL_URL,
+              // SVG con color naranja directo en el fill — sin filtros CSS
+              backgroundImage: makePetalUrl(p.color),
               backgroundSize: 'contain',
               backgroundRepeat: 'no-repeat',
-              // Color via filtro (el SVG es blanco, el filtro lo colorea)
-              filter: `drop-shadow(0 0 3px ${p.color}) sepia(1) saturate(4) hue-rotate(${
-                p.color === '#EAB308' || p.color === '#FDE047' || p.color === '#FCD34D'
-                  ? '10deg'
-                  : '340deg'
-              })`,
+              filter: `drop-shadow(0 0 4px ${p.color}bb)`,
               /* CSS custom props para la animación */
               ['--r0' as string]: `${p.rotate}deg`,
               ['--r1' as string]: `${p.rotate + p.rotateDelta * 0.35}deg`,
