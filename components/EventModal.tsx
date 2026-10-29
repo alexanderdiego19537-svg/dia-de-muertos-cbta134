@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, MapPin, Music, Sparkles, CheckCircle } from 'lucide-react';
+import { X, Music, Sparkles, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
 
 interface EventModalProps {
@@ -65,21 +65,6 @@ export default function EventModal({ isOpen, onClose }: EventModalProps) {
                   Miércoles 28 de Octubre — CBTA #134, Tetlanhocan, Tlaxcala
                 </p>
 
-                {/* Info pills */}
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                  {[
-                    { icon: Clock, color: '#F97316', title: '8:00 AM – 1:00 PM', sub: 'Horario del evento' },
-                    { icon: MapPin, color: '#7C3AED', title: 'Auditorio Aquiahuac', sub: 'San Francisco Tetlanhocan' },
-                  ].map(({ icon: Icon, color, title, sub }) => (
-                    <div key={title} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                      <Icon size={16} style={{ color, flexShrink: 0 }} />
-                      <div>
-                        <p style={{ color: 'white', fontSize: '13px', fontWeight: 600 }}>{title}</p>
-                        <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', color: 'rgba(255,255,255,0.35)' }}>{sub}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
 
                 {/* Activities */}
                 <div className="flex items-center gap-2 mb-4">
