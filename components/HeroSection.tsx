@@ -183,26 +183,17 @@ export default function HeroSection() {
         )}
 
         {/* ══════════════════════════════════════
-            CATRINA
-            Desktop → pegada al fondo (flex-end)
-            Móvil   → posición absoluta centrada
-                      entre título y bottom bar
+            CATRINA — desktop pegada al fondo,
+            móvil centrada entre título y botones
         ══════════════════════════════════════ */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            zIndex: 10,
-            pointerEvents: 'none',
-            display: 'flex',
-            // CLAVE: en móvil centramos, en desktop pegamos al fondo
-            alignItems: isMobile ? 'center' : 'flex-end',
-            justifyContent: 'center',
-            // En móvil: compensamos el espacio del título arriba (~160px) y del bottom bar (~150px)
-            paddingTop:    isMobile ? '160px' : '0',
-            paddingBottom: isMobile ? '150px' : '0',
-          }}
-        >
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 10, pointerEvents: 'none',
+          display: 'flex',
+          alignItems: isMobile ? 'center' : 'flex-end',
+          justifyContent: 'center',
+          paddingTop:    isMobile ? '160px' : '0',
+          paddingBottom: isMobile ? '120px' : '0',
+        }}>
           <motion.div
             style={{ rotateY, rotateX, perspective: 1000, transformStyle: 'preserve-3d' }}
             initial={{ opacity: 0, scale: 0.9, y: 50 }}
@@ -210,24 +201,8 @@ export default function HeroSection() {
             transition={{ duration: 1.3, ease: 'easeOut', delay: 0.4 }}
           >
             <motion.div style={{ x: isMobile ? 0 : shiftX, y: isMobile ? 0 : shiftY }}>
-              {/* Glow halo */}
-              <div style={{
-                position: 'absolute', bottom: '5%', left: '50%',
-                transform: 'translateX(-50%)',
-                width: '80%', height: '55%',
-                borderRadius: '50%', filter: 'blur(55px)',
-                background: `radial-gradient(ellipse, ${glowColor.replace('0.5', '0.3')} 0%, rgba(124,58,237,0.15) 50%, transparent 80%)`,
-                zIndex: 0,
-              }} />
-
-              {/* Catrina image */}
-              <div style={{
-                position: 'relative',
-                zIndex: 1,
-                // Móvil: más pequeña para que no tape el título ni los botones
-                width:  isMobile ? 'clamp(180px, 68vw, 300px)' : 'clamp(200px, 38vw, 560px)',
-                height: isMobile ? 'clamp(220px, 38vh, 340px)' : 'clamp(340px, 75vh, 850px)',
-              }}>
+              <div style={{ position: 'absolute', bottom: '5%', left: '50%', transform: 'translateX(-50%)', width: '80%', height: '55%', borderRadius: '50%', filter: 'blur(55px)', background: `radial-gradient(ellipse, ${glowColor.replace('0.5', '0.3')} 0%, rgba(124,58,237,0.15) 50%, transparent 80%)`, zIndex: 0 }} />
+              <div style={{ position: 'relative', zIndex: 1, width: isMobile ? 'clamp(180px, 68vw, 300px)' : 'clamp(200px, 38vw, 560px)', height: isMobile ? 'clamp(220px, 38vh, 340px)' : 'clamp(340px, 75vh, 850px)' }}>
                 <Image
                   src="/images/catrina-candle.jpg"
                   alt="Catrina con vela — Día de Muertos CBTA #134 Tetlanhocan"
@@ -236,10 +211,7 @@ export default function HeroSection() {
                   className="object-contain object-bottom"
                   priority
                   loading="eager"
-                  style={{
-                    mixBlendMode: 'screen',
-                    filter: 'drop-shadow(0 0 50px rgba(249,115,22,0.55)) drop-shadow(0 0 120px rgba(234,179,8,0.3)) brightness(1.1) contrast(1.08)',
-                  }}
+                  style={{ mixBlendMode: 'screen', filter: 'drop-shadow(0 0 50px rgba(249,115,22,0.55)) drop-shadow(0 0 120px rgba(234,179,8,0.3)) brightness(1.1) contrast(1.08)' }}
                 />
               </div>
             </motion.div>
@@ -314,36 +286,15 @@ export default function HeroSection() {
             </div>
           )}
 
-          {/* ── Móvil bottom bar ── */}
+          {/* ── Móvil bottom bar — solo botones ── */}
           {isMobile && (
             <motion.div
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 0.6 }}
-              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '0 4px 4px' }}
+              style={{ display: 'flex', gap: 8, width: '100%', padding: '0 4px 4px' }}
             >
-              {/* Fecha y lugar */}
-              <div style={{ padding: '9px 12px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(14px)', display: 'flex', gap: 12, width: '100%', justifyContent: 'center' }}>
-                {[
-                  { icon: Calendar, color: '#F97316', bg: 'rgba(249,115,22,0.14)', title: 'Mié. 28 Oct. 2026', sub: '8:00 AM — 1:00 PM' },
-                  { icon: MapPin, color: '#A78BFA', bg: 'rgba(167,139,250,0.14)', title: 'Auditorio Aquiahuac', sub: 'Tetlanhocan, Tlax.' },
-                ].map(({ icon: Icon, color, bg, title, sub }) => (
-                  <div key={title} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                    <div style={{ width: 26, height: 26, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Icon size={11} style={{ color }} />
-                    </div>
-                    <div>
-                      <p style={{ color: 'white', fontSize: 11, fontWeight: 600, margin: 0 }}>{title}</p>
-                      <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: 'rgba(255,255,255,0.4)', margin: '1px 0 0' }}>{sub}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Botones */}
-              <div style={{ display: 'flex', gap: 8, width: '100%' }}>
-                <button onClick={() => setIsEventOpen(true)} style={{ flex: 1, padding: '11px 0', borderRadius: 999, fontFamily: 'Cinzel, serif', fontWeight: 700, fontSize: 13, color: 'white', border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #F97316, #C2410C)', boxShadow: '0 4px 20px rgba(249,115,22,0.45)' }}>Ver Programa</button>
-                <button onClick={() => setIsChatOpen(true)} style={{ flex: 1, padding: '11px 0', borderRadius: 999, fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', cursor: 'pointer' }}>Más Info →</button>
-              </div>
+              <button onClick={() => setIsEventOpen(true)} style={{ flex: 1, padding: '13px 0', borderRadius: 999, fontFamily: 'Cinzel, serif', fontWeight: 700, fontSize: 14, color: 'white', border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #F97316, #C2410C)', boxShadow: '0 4px 20px rgba(249,115,22,0.45)' }}>Ver Programa</button>
+              <button onClick={() => setIsChatOpen(true)} style={{ flex: 1, padding: '13px 0', borderRadius: 999, fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', cursor: 'pointer' }}>Más Info →</button>
             </motion.div>
           )}
         </div>
