@@ -266,22 +266,6 @@ export default function HeroSection() {
                 <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, maxWidth: 300, textAlign: 'right', fontWeight: 300, textShadow: '0 2px 8px rgba(0,0,0,0.8)', margin: 0 }}>
                   El CBTA #134 de Tetlanhocan te invita a una experiencia cultural única, honrando nuestras raíces y tradiciones.
                 </p>
-                <div style={{ padding: '16px 18px', borderRadius: 18, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(14px)', display: 'flex', flexDirection: 'column', gap: 10, minWidth: 260 }}>
-                  {[
-                    { icon: Calendar, color: '#F97316', bg: 'rgba(249,115,22,0.14)', title: 'Mié. 28 de Octubre, 2026', sub: '8:00 AM — 1:00 PM' },
-                    { icon: MapPin, color: '#A78BFA', bg: 'rgba(167,139,250,0.14)', title: 'Auditorio de Aquiahuac', sub: 'San Fco. Tetlanhocan, Tlax.' },
-                  ].map(({ icon: Icon, color, bg, title, sub }) => (
-                    <div key={title} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <Icon size={14} style={{ color }} />
-                      </div>
-                      <div>
-                        <p style={{ color: 'white', fontSize: 13, fontWeight: 600, margin: 0, textShadow: '0 2px 6px rgba(0,0,0,0.7)' }}>{title}</p>
-                        <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{sub}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </motion.div>
             </div>
           )}
