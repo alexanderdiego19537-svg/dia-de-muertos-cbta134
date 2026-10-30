@@ -143,3 +143,14 @@ html { scroll-behavior: smooth; }
   background: rgba(249,115,22,0.4);
   color: white;
 }
+
+/* ── Centrar texto en secciones de contenido público ── */
+section p,
+section h2,
+section h3,
+section h4,
+section h5,
+section h6,
+section li {
+  text-align: center;
+}
