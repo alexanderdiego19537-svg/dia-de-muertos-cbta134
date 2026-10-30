@@ -137,15 +137,54 @@ export default function Footer() {
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
-            {['Política de Privacidad', 'Términos de Uso', 'Aviso Legal'].map(link => (
-              <button key={link}
-                style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'rgba(255,255,255,0.18)', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 0.2s', padding: 0 }}
-                onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = '#F97316')}
-                onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.18)')}>
-                {link}
-              </button>
-            ))}
+          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
+            <Link
+              href="/privacidad"
+              style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'rgba(255,255,255,0.3)', textDecoration: 'none', transition: 'color 0.2s' }}
+              onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = '#F97316')}
+              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.3)')}
+            >
+              Aviso de Privacidad
+            </Link>
+
+            <span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span>
+
+            <Link
+              href="/terminos"
+              style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'rgba(255,255,255,0.3)', textDecoration: 'none', transition: 'color 0.2s' }}
+              onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = '#F97316')}
+              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.3)')}
+            >
+              Términos de Uso
+            </Link>
+
+            <span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span>
+
+            <button
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.dispatchEvent(new CustomEvent('cbta134:open_cookie_banner'));
+                }
+              }}
+              style={{
+                fontFamily: 'JetBrains Mono, monospace',
+                fontSize: 11,
+                color: 'rgba(255,255,255,0.3)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'color 0.2s',
+                padding: 0,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+              }}
+              onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = '#F97316')}
+              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.3)')}
+            >
+              <span>🍪</span>
+              <span>Preferencias de Cookies</span>
+            </button>
           </div>
 
           <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(255,255,255,0.22)', marginTop: 8, textAlign: 'center', lineHeight: 1.6 }}>

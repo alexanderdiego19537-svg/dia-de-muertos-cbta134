@@ -22,88 +22,121 @@ export default function VisitorTracker() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (hasExecuted.current || memoryCounted) return;
-    hasExecuted.current = true;
 
-    // 1. Capas de verificación: Memoria, Cookies (1 año), LocalStorage y SessionStorage
-    const cookieCounted = getCookie('cbta134_visited');
-    let localCounted = false;
-    let sessionCounted = false;
-    try {
-      localCounted = !!localStorage.getItem('cbta134_visited');
-      sessionCounted = !!sessionStorage.getItem('cbta134_visited');
-    } catch {}
+    function runTracking() {
+      if (hasExecuted.current || memoryCounted) return;
 
-    if (memoryCounted || cookieCounted || localCounted || sessionCounted) {
-      // Dispositivo ya contabilizado: bloqueo inmediato sin peticiones a la base de datos
-      return;
-    }
+      // Verificar consentimiento legal: solo rastrear si aceptó todas
+      const consent = getCookie('cbta134_cookie_consent') || (() => {
+        try { return localStorage.getItem('cbta134_cookie_consent'); } catch { return null; }
+      })();
 
-    // 2. Obtener o crear UUID persistente único del dispositivo
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    let deviceId = getCookie('cbta134_did');
-    if (!deviceId || !uuidRegex.test(deviceId)) {
-      try {
-        const stored = localStorage.getItem('cbta134_did');
-        if (stored && uuidRegex.test(stored)) {
-          deviceId = stored;
-        }
-      } catch {}
-    }
-
-    if (!deviceId || !uuidRegex.test(deviceId)) {
-      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-        deviceId = crypto.randomUUID();
-      } else {
-        deviceId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-          const r = (Math.random() * 16) | 0;
-          const v = c === 'x' ? r : (r & 0x3) | 0x8;
-          return v.toString(16);
-        });
+      if (consent === 'essential') {
+        // El usuario eligió solo cookies esenciales: respeto total de privacidad
+        return;
       }
-    }
 
-    // 3. Marcar inmediatamente en TODAS las capas de persistencia local
-    memoryCounted = true;
-    setCookie('cbta134_visited', '1');
-    setCookie('cbta134_did', deviceId);
-    try {
-      localStorage.setItem('cbta134_visited', '1');
-      localStorage.setItem('cbta134_did', deviceId);
-      sessionStorage.setItem('cbta134_visited', '1');
-    } catch {}
+      if (!consent) {
+        // Aún no ha decidido en el banner: esperar a que acepte
+        return;
+      }
 
-    // 4. Registrar de forma única en Supabase
-    async function logVisit() {
+      hasExecuted.current = true;
+
+      // 1. Capas de verificación: Memoria, Cookies (1 año), LocalStorage y SessionStorage
+      const cookieCounted = getCookie('cbta134_visited');
+      let localCounted = false;
+      let sessionCounted = false;
       try {
-        const supabase = createClient();
-        const path = window.location.pathname || '/';
+        localCounted = !!localStorage.getItem('cbta134_visited');
+        sessionCounted = !!sessionStorage.getItem('cbta134_visited');
+      } catch {}
 
-        // PostgreSQL rechaza con código 23505 si el id ya existe (PRIMARY KEY)
-        const { error } = await supabase.from('visitas').insert({
-          id: deviceId,
-          pagina: path,
-        });
+      if (memoryCounted || cookieCounted || localCounted || sessionCounted) {
+        // Dispositivo ya contabilizado: bloqueo inmediato sin peticiones a la base de datos
+        return;
+      }
 
-        if (!error || error.code === '23505') {
-          // Difundir actualización en vivo
-          const channel = supabase.channel('cbta134_stats_sync');
-          channel.subscribe(status => {
-            if (status === 'SUBSCRIBED') {
-              channel.send({
-                type: 'broadcast',
-                event: 'visit_logged',
-                payload: { deviceId, path },
-              });
-            }
+      // 2. Obtener o crear UUID persistente único del dispositivo
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      let deviceId = getCookie('cbta134_did');
+      if (!deviceId || !uuidRegex.test(deviceId)) {
+        try {
+          const stored = localStorage.getItem('cbta134_did');
+          if (stored && uuidRegex.test(stored)) {
+            deviceId = stored;
+          }
+        } catch {}
+      }
+
+      if (!deviceId || !uuidRegex.test(deviceId)) {
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+          deviceId = crypto.randomUUID();
+        } else {
+          deviceId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+            const r = (Math.random() * 16) | 0;
+            const v = c === 'x' ? r : (r & 0x3) | 0x8;
+            return v.toString(16);
           });
         }
-      } catch (err) {
-        console.error('VisitorTracker log error:', err);
       }
+
+      // 3. Marcar inmediatamente en TODAS las capas de persistencia local
+      memoryCounted = true;
+      setCookie('cbta134_visited', '1');
+      setCookie('cbta134_did', deviceId);
+      try {
+        localStorage.setItem('cbta134_visited', '1');
+        localStorage.setItem('cbta134_did', deviceId);
+        sessionStorage.setItem('cbta134_visited', '1');
+      } catch {}
+
+      // 4. Registrar de forma única en Supabase
+      async function logVisit() {
+        try {
+          const supabase = createClient();
+          const path = window.location.pathname || '/';
+
+          // PostgreSQL rechaza con código 23505 si el id ya existe (PRIMARY KEY)
+          const { error } = await supabase.from('visitas').insert({
+            id: deviceId,
+            pagina: path,
+          });
+
+          if (!error || error.code === '23505') {
+            // Difundir actualización en vivo
+            const channel = supabase.channel('cbta134_stats_sync');
+            channel.subscribe(status => {
+              if (status === 'SUBSCRIBED') {
+                channel.send({
+                  type: 'broadcast',
+                  event: 'visit_logged',
+                  payload: { deviceId, path },
+                });
+              }
+            });
+          }
+        } catch (err) {
+          console.error('VisitorTracker log error:', err);
+        }
+      }
+
+      logVisit();
     }
 
-    logVisit();
+    // Ejecutar si ya existe consentimiento previo
+    runTracking();
+
+    // Escuchar si el usuario acepta las cookies en tiempo real desde el banner
+    const onConsentUpdated = (e: Event) => {
+      const custom = e as CustomEvent;
+      if (custom.detail === 'accepted') {
+        runTracking();
+      }
+    };
+
+    window.addEventListener('cbta134:consent_updated', onConsentUpdated);
+    return () => window.removeEventListener('cbta134:consent_updated', onConsentUpdated);
   }, []);
 
   return null;

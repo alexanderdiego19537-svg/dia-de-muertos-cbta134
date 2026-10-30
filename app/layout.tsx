@@ -3,6 +3,7 @@ import "./globals.css";
 import PetalRain from "@/components/PetalRain";
 import VisitorTracker from "@/components/VisitorTracker";
 import EditorBar from "@/components/editor/EditorBar";
+import CookieBanner from "@/components/CookieBanner";
 
 export const metadata: Metadata = {
   title: "Día de Muertos 2026 — CBTA #134 Tetlanhocan, Tlaxcala",
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
     "Celebración cultural del Día de Muertos en el Centro de Bachillerato Tecnológico Agropecuario #134 de San Francisco Tetlanhocan, Tlaxcala. Miércoles 28 de octubre de 2026.",
   keywords:
     "Día de Muertos, CBTA 134, CBT 134, Tetlanhocan, Tlaxcala, evento cultural, catrinas, PAEC",
-  authors: [{ name: "Diego Alexander Zecua Zecua" }],
+  authors: [{ name: "Diego Alexander" }],
   icons: {
     icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💀</text></svg>",
   },
@@ -38,6 +39,8 @@ export default function RootLayout({
         <PetalRain count={38} />
         {/* Registro único de visita por dispositivo */}
         <VisitorTracker />
+        {/* Banner de consentimiento legal de cookies LFPDPPP */}
+        <CookieBanner />
         {/* Barra de herramientas para editores en la misma página */}
         <EditorBar />
         {children}

@@ -195,7 +195,24 @@ export default function NavMenu({ isOpen, onClose, ambientColor, setAmbientColor
             <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
               <Image src="/images/logo-cbta.png" alt="Logo CBTA 134" width={52} height={52} style={{ opacity: 0.35, marginBottom: 12 }} />
               <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(255,255,255,0.25)', margin: '0 0 4px' }}>© 2026 CBT Agropecuario #134</p>
-              <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(255,255,255,0.15)', margin: 0 }}>Tetlanhocan, Tlaxcala, México</p>
+              <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(255,255,255,0.15)', margin: '0 0 10px' }}>Tetlanhocan, Tlaxcala, México</p>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <Link
+                  href="/privacidad"
+                  onClick={onClose}
+                  style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(249,115,22,0.6)', textDecoration: 'none' }}
+                >
+                  Aviso de Privacidad
+                </Link>
+                <span style={{ color: 'rgba(255,255,255,0.1)', fontSize: 10 }}>·</span>
+                <Link
+                  href="/terminos"
+                  onClick={onClose}
+                  style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(255,255,255,0.35)', textDecoration: 'none' }}
+                >
+                  Términos
+                </Link>
+              </div>
             </div>
           </motion.div>
         </>
