@@ -1,17 +1,45 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import DepthCarousel from '@/components/DepthCarousel';
 import { motion } from 'framer-motion';
+import { createClient } from '@/lib/supabase/client';
 
-const items = [
+const defaultItems = [
   { image: '/images/catrina-candle.jpg',  alt: 'Catrina con vela encendida',      label: 'La llama que guía'       },
   { image: '/images/catrina-roses.jpg',   alt: 'Catrina con rosas naranjas',       label: 'Elegancia y misterio'    },
   { image: '/images/catrina-dress.jpg',   alt: 'Catrina con vestido tradicional',  label: 'La Catrina tradicional'  },
-  { image: '/images/catrina-candle.jpg',  alt: 'Catrina con vela — vista 2',       label: 'Luz entre sombras'       },
-  { image: '/images/catrina-roses.jpg',   alt: 'Catrina floral — vista 2',         label: 'Flores del Más Allá'     },
+  { image: '/images/tradicion/almas-mascotas-ofrenda.jpg', alt: 'Almas y mascotas', label: 'Reencuentro Familiar' },
+  { image: '/images/tradicion/altar-monumental.png', alt: 'Altar tradicional', label: 'Ofrenda Monumental' },
 ];
 
 export default function GaleriaClient() {
+  const [carouselItems, setCarouselItems] = useState(defaultItems);
+
+  useEffect(() => {
+    const supabase = createClient();
+    async function load() {
+      try {
+        const { data, error } = await supabase
+          .from('gallery')
+          .select('*')
+          .eq('visible', true)
+          .order('created_at', { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          setCarouselItems(data.map(d => ({
+            image: d.image_url,
+            alt: d.title || 'Foto de Galería',
+            label: d.title || 'Día de Muertos',
+          })));
+        }
+      } catch (e) {
+        console.error('Error fetching gallery items:', e);
+      }
+    }
+    load();
+  }, []);
+
   return (
     <section style={{
       backgroundColor: '#080208',
@@ -88,7 +116,7 @@ export default function GaleriaClient() {
           style={{ height: 520 }}
         >
           <DepthCarousel
-            items={items}
+            items={carouselItems}
             depth={220}
             spread={90}
             tilt={22}
@@ -118,12 +146,12 @@ export default function GaleriaClient() {
           style={{
             fontFamily: 'JetBrains Mono, monospace',
             fontSize: 11,
-            color: 'rgba(255,255,255,0.2)',
+            color: 'rgba(255,255,255,0.25)',
             textAlign: 'center',
             marginTop: 32,
           }}
         >
-          Próximamente se añadirán fotografías del evento del 28 de octubre · Haz clic en las tarjetas traseras para navegar
+          Haz clic o desliza en las tarjetas para recorrer la galería 3D · Fotos administradas desde Supabase
         </motion.p>
       </div>
     </section>

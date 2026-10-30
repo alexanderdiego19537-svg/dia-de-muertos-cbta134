@@ -3,6 +3,7 @@ import AboutSection from '@/components/AboutSection';
 import TraditionsSection from '@/components/TraditionsSection';
 import GallerySection from '@/components/GallerySection';
 import LocationSection from '@/components/LocationSection';
+import CommunityInteractions from '@/components/CommunityInteractions';
 import Footer from '@/components/Footer';
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
       <TraditionsSection />
       <GallerySection showViewAll />
       <LocationSection />
+      <CommunityInteractions />
       <Footer />
     </main>
   );

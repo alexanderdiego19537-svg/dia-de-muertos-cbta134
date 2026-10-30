@@ -4,7 +4,7 @@ import { useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import {
   LayoutDashboard, Images, FileText, Calendar,
-  Megaphone, BarChart2, LogOut, Skull, Menu, X
+  Megaphone, BarChart2, LogOut, Skull, Menu, X, MessageSquare
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -13,16 +13,17 @@ import AdminContent from './AdminContent';
 import AdminPrograma from './AdminPrograma';
 import AdminAnuncios from './AdminAnuncios';
 import AdminStats from './AdminStats';
+import AdminComentarios from './AdminComentarios';
 
 interface Props { user: User }
 
 const TABS = [
-  { id: 'dashboard', label: 'Inicio',      icon: LayoutDashboard },
-  { id: 'gallery',   label: 'Galería',     icon: Images },
-  { id: 'content',   label: 'Contenido',   icon: FileText },
-  { id: 'programa',  label: 'Programa',    icon: Calendar },
-  { id: 'anuncios',  label: 'Anuncios',    icon: Megaphone },
-  { id: 'stats',     label: 'Estadísticas',icon: BarChart2 },
+  { id: 'dashboard',   label: 'Inicio',       icon: LayoutDashboard },
+  { id: 'gallery',     label: 'Galería',      icon: Images },
+  { id: 'comentarios', label: 'Comentarios',  icon: MessageSquare },
+  { id: 'programa',    label: 'Programa',     icon: Calendar },
+  { id: 'anuncios',    label: 'Anuncios',     icon: Megaphone },
+  { id: 'stats',       label: 'Estadísticas', icon: BarChart2 },
 ];
 
 export default function AdminDashboard({ user }: Props) {
@@ -164,12 +165,12 @@ export default function AdminDashboard({ user }: Props) {
 
         {/* Contenido del tab */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
-          {activeTab === 'dashboard' && <DashboardHome user={user} setActiveTab={setActiveTab} />}
-          {activeTab === 'gallery'   && <AdminGallery />}
-          {activeTab === 'content'   && <AdminContent />}
-          {activeTab === 'programa'  && <AdminPrograma />}
-          {activeTab === 'anuncios'  && <AdminAnuncios />}
-          {activeTab === 'stats'     && <AdminStats />}
+          {activeTab === 'dashboard'   && <DashboardHome user={user} setActiveTab={setActiveTab} />}
+          {activeTab === 'gallery'     && <AdminGallery />}
+          {activeTab === 'comentarios' && <AdminComentarios />}
+          {activeTab === 'programa'    && <AdminPrograma />}
+          {activeTab === 'anuncios'    && <AdminAnuncios />}
+          {activeTab === 'stats'       && <AdminStats />}
         </div>
       </div>
     </div>
@@ -179,11 +180,11 @@ export default function AdminDashboard({ user }: Props) {
 /* ── Pantalla de inicio del panel ── */
 function DashboardHome({ user, setActiveTab }: { user: User; setActiveTab: (t: string) => void }) {
   const acciones = [
-    { icon: Images,    title: 'Subir fotos',      desc: 'Agrega fotos del evento a la galería', tab: 'gallery',   color: '#F97316' },
-    { icon: FileText,  title: 'Editar contenido',  desc: 'Cambia textos, fecha y lugar',         tab: 'content',   color: '#A78BFA' },
-    { icon: Calendar,  title: 'Editar programa',   desc: 'Actualiza las actividades del evento',  tab: 'programa',  color: '#34D399' },
-    { icon: Megaphone, title: 'Publicar anuncio',  desc: 'Agrega un aviso o noticia',            tab: 'anuncios',  color: '#FBBF24' },
-    { icon: BarChart2, title: 'Ver estadísticas',  desc: 'Visitas, likes y más',                  tab: 'stats',     color: '#60A5FA' },
+    { icon: Images,        title: 'Subir fotos',        desc: 'Agrega fotos del evento a la galería', tab: 'gallery',     color: '#F97316' },
+    { icon: MessageSquare, title: 'Moderar comentarios',desc: 'Revisa o elimina mensajes del muro',   tab: 'comentarios', color: '#38BDF8' },
+    { icon: Calendar,      title: 'Editar programa',    desc: 'Actualiza las actividades del evento',  tab: 'programa',    color: '#34D399' },
+    { icon: Megaphone,     title: 'Publicar anuncio',   desc: 'Agrega un aviso o noticia',            tab: 'anuncios',    color: '#FBBF24' },
+    { icon: BarChart2,     title: 'Ver estadísticas',   desc: 'Visitas, likes y métricas en vivo',    tab: 'stats',       color: '#60A5FA' },
   ];
 
   return (

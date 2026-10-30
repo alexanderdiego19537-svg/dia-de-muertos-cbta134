@@ -1,7 +1,9 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Clock, Users, MapPin, Star, Music, Flag, CheckCircle } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 interface ProgramaSectionProps {
   standalone?: boolean;
@@ -92,6 +94,35 @@ const schedule = [
 ];
 
 export default function ProgramaSection({ standalone = false }: ProgramaSectionProps) {
+  const [scheduleList, setScheduleList] = useState(schedule);
+
+  useEffect(() => {
+    const supabase = createClient();
+    async function load() {
+      try {
+        const { data, error } = await supabase
+          .from('programa')
+          .select('*')
+          .eq('visible', true)
+          .order('orden', { ascending: true });
+
+        if (!error && data && data.length > 0) {
+          setScheduleList(data.map((item, idx) => ({
+            time: item.hora,
+            duration: null,
+            title: item.titulo,
+            detail: item.descripcion || (item.lugar ? `Lugar: ${item.lugar}` : ''),
+            icon: item.titulo.toLowerCase().includes('festival') ? Music : idx % 2 === 0 ? Star : Users,
+            color: idx % 3 === 0 ? '#F97316' : idx % 3 === 1 ? '#EAB308' : '#7C3AED',
+            highlight: item.titulo.toLowerCase().includes('festival') || idx === 0,
+          })));
+        }
+      } catch (err) {
+        console.error('Error fetching programa:', err);
+      }
+    }
+    load();
+  }, []);
   return (
     <section style={{
       backgroundColor: '#080208',
@@ -174,7 +205,7 @@ export default function ProgramaSection({ standalone = false }: ProgramaSectionP
             background: 'linear-gradient(to bottom, transparent, rgba(249,115,22,0.25) 8%, rgba(249,115,22,0.25) 92%, transparent)',
           }} />
 
-          {schedule.map((item, i) => {
+          {scheduleList.map((item, i) => {
             const Icon = item.icon;
             const timeStr = item.duration ? `${item.time}–${item.duration}` : item.time;
             return (

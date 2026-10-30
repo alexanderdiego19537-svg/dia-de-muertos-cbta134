@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Eye, Heart, Images, Megaphone, Loader2 } from 'lucide-react';
+import { Eye, Heart, Images, Megaphone, MessageSquare, Loader2 } from 'lucide-react';
 
 interface Stats {
   total_views: number;
   total_likes: number;
   total_images: number;
   total_anuncios: number;
+  total_comentarios: number;
 }
 
 function StatCard({ icon: Icon, label, value, color }: {
@@ -42,25 +43,32 @@ function StatCard({ icon: Icon, label, value, color }: {
 
 export default function AdminStats() {
   const supabase = createClient();
-  const [stats, setStats]   = useState<Stats | null>(null);
+  const [stats, setStats]     = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      const [views, likes, images, anuncios] = await Promise.all([
-        supabase.from('page_views').select('*', { count: 'exact', head: true }),
-        supabase.from('likes').select('*', { count: 'exact', head: true }),
-        supabase.from('gallery_images').select('*', { count: 'exact', head: true }),
-        supabase.from('anuncios').select('*', { count: 'exact', head: true }).eq('activo', true),
-      ]);
+      try {
+        const [views, likes, images, anuncios, comentarios] = await Promise.all([
+          supabase.from('visitas').select('*', { count: 'exact', head: true }),
+          supabase.from('likes').select('*', { count: 'exact', head: true }),
+          supabase.from('gallery').select('*', { count: 'exact', head: true }),
+          supabase.from('anuncios').select('*', { count: 'exact', head: true }).eq('activo', true),
+          supabase.from('comentarios').select('*', { count: 'exact', head: true }),
+        ]);
 
-      setStats({
-        total_views:    views.count    ?? 0,
-        total_likes:    likes.count    ?? 0,
-        total_images:   images.count   ?? 0,
-        total_anuncios: anuncios.count ?? 0,
-      });
-      setLoading(false);
+        setStats({
+          total_views:       views.count       ?? 0,
+          total_likes:       likes.count       ?? 0,
+          total_images:      images.count      ?? 0,
+          total_anuncios:    anuncios.count    ?? 0,
+          total_comentarios: comentarios.count ?? 0,
+        });
+      } catch (err) {
+        console.error('Error loading stats:', err);
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, []);
@@ -73,13 +81,13 @@ export default function AdminStats() {
   );
 
   return (
-    <div style={{ maxWidth: 700, margin: '0 auto' }}>
+    <div style={{ maxWidth: 800, margin: '0 auto' }}>
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontFamily: 'Cinzel, serif', fontWeight: 900, fontSize: 22, color: 'white', margin: '0 0 6px' }}>
-          📊 Estadísticas
+          📊 Estadísticas en Vivo (Supabase)
         </h1>
         <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: 0 }}>
-          Resumen de actividad de tu página.
+          Métricas y conteos en tiempo real extraídos de tu base de datos de producción.
         </p>
       </div>
 
@@ -89,10 +97,11 @@ export default function AdminStats() {
         gap: 14,
         marginBottom: 28,
       }}>
-        <StatCard icon={Eye}       label="Visitas totales"    value={stats?.total_views ?? 0}    color="#60A5FA" />
-        <StatCard icon={Heart}     label="Likes totales"      value={stats?.total_likes ?? 0}    color="#F87171" />
-        <StatCard icon={Images}    label="Fotos en galería"   value={stats?.total_images ?? 0}   color="#F97316" />
-        <StatCard icon={Megaphone} label="Anuncios activos"   value={stats?.total_anuncios ?? 0} color="#FBBF24" />
+        <StatCard icon={Eye}           label="Visitas registradas"  value={stats?.total_views ?? 0}       color="#60A5FA" />
+        <StatCard icon={Heart}         label="Likes recibidos"      value={stats?.total_likes ?? 0}       color="#F87171" />
+        <StatCard icon={Images}        label="Fotos en galería"     value={stats?.total_images ?? 0}      color="#F97316" />
+        <StatCard icon={MessageSquare} label="Comentarios"          value={stats?.total_comentarios ?? 0} color="#34D399" />
+        <StatCard icon={Megaphone}     label="Anuncios activos"     value={stats?.total_anuncios ?? 0}    color="#FBBF24" />
       </div>
 
       <div style={{
@@ -100,9 +109,8 @@ export default function AdminStats() {
         border: '1px solid rgba(249,115,22,0.12)',
         borderRadius: 12, padding: '16px 20px',
       }}>
-        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', margin: 0, lineHeight: 1.6 }}>
-          💡 Las estadísticas detalladas (por día, por usuario) estarán disponibles en una próxima actualización.
-          Por ahora se muestran los totales acumulados.
+        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: 1.6 }}>
+          💡 Las métricas se actualizan de forma continua según la interacción de los visitantes con la plataforma.
         </p>
       </div>
     </div>

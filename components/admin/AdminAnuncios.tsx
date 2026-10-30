@@ -2,23 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Plus, Trash2, Save, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Save, Loader2, Megaphone } from 'lucide-react';
 
 interface Anuncio {
   id?: string;
   titulo: string;
-  cuerpo: string;
-  tipo: 'info' | 'aviso' | 'urgente';
+  contenido: string;
   activo: boolean;
   created_at?: string;
 }
 
 const EMPTY: Omit<Anuncio, 'id' | 'created_at'> = {
-  titulo: '', cuerpo: '', tipo: 'info', activo: true,
-};
-
-const TIPO_COLOR: Record<string, string> = {
-  info: '#60A5FA', aviso: '#FBBF24', urgente: '#F87171',
+  titulo: '', contenido: '', activo: true,
 };
 
 const inputStyle: React.CSSProperties = {
@@ -49,9 +44,15 @@ export default function AdminAnuncios() {
   }, []);
 
   async function handleSave(item: Anuncio) {
+    if (!item.titulo.trim()) {
+      alert('Por favor ingresa un título para el aviso');
+      return;
+    }
+
     setSaving(item.id ?? 'new');
     const { id, created_at, ...rest } = item;
     let error;
+
     if (id) {
       ({ error } = await supabase.from('anuncios').update(rest).eq('id', id));
     } else {
@@ -59,11 +60,17 @@ export default function AdminAnuncios() {
       error = e;
       if (inserted) setItems(prev => prev.map(i => i === item ? inserted : i));
     }
+
     setSaving(null);
-    if (error) alert('Error: ' + error.message);
+    if (error) {
+      alert('Error al guardar: ' + error.message);
+    } else {
+      alert('Anuncio guardado con éxito ✓');
+    }
   }
 
   async function handleDelete(item: Anuncio) {
+    if (!confirm('¿Deseas eliminar este anuncio?')) return;
     if (!item.id) { setItems(prev => prev.filter(i => i !== item)); return; }
     await supabase.from('anuncios').delete().eq('id', item.id);
     setItems(prev => prev.filter(i => i.id !== item.id));
@@ -73,19 +80,21 @@ export default function AdminAnuncios() {
     setItems(prev => prev.map((item, i) => i === index ? { ...item, [field]: value } : item));
   }
 
-  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
-    <Loader2 size={24} style={{ color: '#F97316', animation: 'spin 1s linear infinite' }} />
-    <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
-  </div>;
+  if (loading) return (
+    <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
+      <Loader2 size={24} style={{ color: '#F97316', animation: 'spin 1s linear infinite' }} />
+      <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
+    </div>
+  );
 
   return (
     <div style={{ maxWidth: 700, margin: '0 auto' }}>
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontFamily: 'Cinzel, serif', fontWeight: 900, fontSize: 22, color: 'white', margin: '0 0 6px' }}>
-          📢 Anuncios
+          📢 Anuncios Oficiales (Supabase)
         </h1>
         <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: 0 }}>
-          Los anuncios activos aparecen en la página principal del sitio.
+          Los avisos activos se guardan en la base de datos y se notifican en el portal.
         </p>
       </div>
 
@@ -93,25 +102,18 @@ export default function AdminAnuncios() {
         {items.map((item, i) => (
           <div key={item.id ?? i} style={{
             background: 'rgba(255,255,255,0.02)',
-            border: `1px solid ${item.activo ? TIPO_COLOR[item.tipo] + '30' : 'rgba(255,255,255,0.07)'}`,
+            border: `1px solid ${item.activo ? 'rgba(249,115,22,0.3)' : 'rgba(255,255,255,0.07)'}`,
             borderRadius: 12, padding: 16,
-            opacity: item.activo ? 1 : 0.5,
+            opacity: item.activo ? 1 : 0.6,
           }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 10, marginBottom: 10, alignItems: 'center' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 10, marginBottom: 10, alignItems: 'center' }}>
               {/* Título */}
-              <input style={inputStyle} value={item.titulo} placeholder="Título del anuncio"
-                onChange={e => update(i, 'titulo', e.target.value)} />
-
-              {/* Tipo */}
-              <select
-                value={item.tipo}
-                onChange={e => update(i, 'tipo', e.target.value as Anuncio['tipo'])}
-                style={{ ...inputStyle, width: 'auto', padding: '10px 10px', cursor: 'pointer' }}
-              >
-                <option value="info">ℹ️ Info</option>
-                <option value="aviso">⚠️ Aviso</option>
-                <option value="urgente">🔴 Urgente</option>
-              </select>
+              <input
+                style={inputStyle}
+                value={item.titulo}
+                placeholder="Título del anuncio..."
+                onChange={e => update(i, 'titulo', e.target.value)}
+              />
 
               {/* Activo toggle */}
               <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', userSelect: 'none' }}>
@@ -131,29 +133,42 @@ export default function AdminAnuncios() {
                     transition: 'left 0.2s',
                   }} />
                 </div>
-                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
-                  {item.activo ? 'Activo' : 'Oculto'}
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
+                  {item.activo ? 'Visible' : 'Oculto'}
                 </span>
               </label>
             </div>
 
-            {/* Cuerpo */}
+            {/* Contenido */}
             <textarea
               rows={2}
               style={{ ...inputStyle, resize: 'vertical', marginBottom: 10 }}
-              value={item.cuerpo}
-              placeholder="Texto del anuncio..."
-              onChange={e => update(i, 'cuerpo', e.target.value)}
+              value={item.contenido || ''}
+              placeholder="Texto o descripción del aviso..."
+              onChange={e => update(i, 'contenido', e.target.value)}
             />
 
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => handleSave(item)} disabled={saving === (item.id ?? 'new')}
-                style={{ display:'flex', alignItems:'center', gap:6, padding:'7px 14px', borderRadius:8, border:'none', background:'rgba(249,115,22,0.15)', color:'#F97316', cursor:'pointer', fontSize:12, fontFamily:'Inter, sans-serif' }}>
+              <button
+                onClick={() => handleSave(item)}
+                disabled={saving === (item.id ?? 'new')}
+                style={{
+                  display:'flex', alignItems:'center', gap:6, padding:'7px 14px', borderRadius:8,
+                  border:'none', background:'rgba(249,115,22,0.15)', color:'#F97316', cursor:'pointer',
+                  fontSize:12, fontFamily:'Inter, sans-serif', fontWeight: 600,
+                }}
+              >
                 {saving === (item.id ?? 'new') ? <Loader2 size={13} style={{ animation:'spin 1s linear infinite' }}/> : <Save size={13}/>}
                 Guardar
               </button>
-              <button onClick={() => handleDelete(item)}
-                style={{ display:'flex', alignItems:'center', gap:6, padding:'7px 14px', borderRadius:8, border:'none', background:'rgba(220,38,38,0.1)', color:'#F87171', cursor:'pointer', fontSize:12, fontFamily:'Inter, sans-serif' }}>
+              <button
+                onClick={() => handleDelete(item)}
+                style={{
+                  display:'flex', alignItems:'center', gap:6, padding:'7px 14px', borderRadius:8,
+                  border:'none', background:'rgba(220,38,38,0.1)', color:'#F87171', cursor:'pointer',
+                  fontSize:12, fontFamily:'Inter, sans-serif',
+                }}
+              >
                 <Trash2 size={13}/> Eliminar
               </button>
             </div>
@@ -161,14 +176,20 @@ export default function AdminAnuncios() {
         ))}
 
         {items.length === 0 && (
-          <div style={{ textAlign: 'center', padding: 32, color: 'rgba(255,255,255,0.25)', fontSize: 14 }}>
-            No hay anuncios. ¡Crea el primero!
+          <div style={{ textAlign: 'center', padding: 32, color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>
+            No hay anuncios registrados en la base de datos.
           </div>
         )}
       </div>
 
-      <button onClick={() => setItems(prev => [{ ...EMPTY }, ...prev])}
-        style={{ display:'flex', alignItems:'center', gap:8, padding:'11px 18px', borderRadius:10, background:'rgba(249,115,22,0.1)', border:'1px dashed rgba(249,115,22,0.3)', color:'#F97316', cursor:'pointer', fontFamily:'Inter, sans-serif', fontSize:13, fontWeight:600 }}>
+      <button
+        onClick={() => setItems(prev => [{ ...EMPTY }, ...prev])}
+        style={{
+          display:'flex', alignItems:'center', gap:8, padding:'11px 18px', borderRadius:10,
+          background:'rgba(249,115,22,0.1)', border:'1px dashed rgba(249,115,22,0.3)',
+          color:'#F97316', cursor:'pointer', fontFamily:'Inter, sans-serif', fontSize:13, fontWeight:600,
+        }}
+      >
         <Plus size={16}/> Nuevo anuncio
       </button>
 
