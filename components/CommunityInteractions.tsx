@@ -28,58 +28,38 @@ export default function CommunityInteractions() {
   const [enviando, setEnviando] = useState(false);
   const [enviadoOk, setEnviadoOk] = useState(false);
 
-  // ── 1. Registrar Visita única por sesión de navegador ──
-  useEffect(() => {
-    async function recordVisit() {
-      try {
-        const hasSession = sessionStorage.getItem('cbta134_visit_logged');
-        if (!hasSession) {
-          await supabase.from('visitas').insert({ pagina: 'home' });
-          sessionStorage.setItem('cbta134_visit_logged', 'true');
-        }
-
-        // Consultar visitas totales
-        const { count } = await supabase.from('visitas').select('*', { count: 'exact', head: true });
-        if (count !== null) setVisitas(count);
-      } catch (err) {
-        console.error('Error registrando visita:', err);
-      }
+  // ── 1. Cargar estadísticas reales (visitas y likes) ──
+  async function fetchCounts() {
+    try {
+      const [vRes, lRes] = await Promise.all([
+        supabase.from('visitas').select('*', { count: 'exact', head: true }),
+        supabase.from('likes').select('*', { count: 'exact', head: true }),
+      ]);
+      if (vRes.count !== null) setVisitas(vRes.count);
+      if (lRes.count !== null) setLikes(lRes.count);
+    } catch (err) {
+      console.error('Error cargando estadísticas:', err);
     }
+  }
 
-    recordVisit();
-  }, [supabase]);
+  // ── 2. Cargar estado de Like del usuario actual ──
+  async function checkUserLike() {
+    try {
+      const sessionId = localStorage.getItem('cbta134_device_id') || localStorage.getItem('cbta134_user_session');
+      if (!sessionId) return;
 
-  // ── 2. Cargar Likes y estado del usuario ──
-  useEffect(() => {
-    async function loadLikes() {
-      try {
-        // Conteo total
-        const { count } = await supabase.from('likes').select('*', { count: 'exact', head: true });
-        if (count !== null) setLikes(count);
+      const { data } = await supabase
+        .from('likes')
+        .select('id')
+        .eq('session_id', sessionId)
+        .eq('pagina', 'home')
+        .maybeSingle();
 
-        // Identificador persistente en localStorage
-        let sessionId = localStorage.getItem('cbta134_user_session');
-        if (!sessionId) {
-          sessionId = 'user_' + Math.random().toString(36).substring(2, 12);
-          localStorage.setItem('cbta134_user_session', sessionId);
-        }
-
-        // Verificar si ya dio like
-        const { data } = await supabase
-          .from('likes')
-          .select('id')
-          .eq('session_id', sessionId)
-          .eq('pagina', 'home')
-          .maybeSingle();
-
-        if (data) setHasLiked(true);
-      } catch (err) {
-        console.error('Error cargando likes:', err);
-      }
+      if (data) setHasLiked(true);
+    } catch (err) {
+      console.error('Error verificando like:', err);
     }
-
-    loadLikes();
-  }, [supabase]);
+  }
 
   // ── 3. Cargar Comentarios ──
   async function loadComentarios() {
@@ -98,17 +78,64 @@ export default function CommunityInteractions() {
     }
   }
 
+  // ── 4. Sincronización en Tiempo Real (WebSockets + Polling de Respaldo) ──
   useEffect(() => {
+    fetchCounts();
+    checkUserLike();
     loadComentarios();
-  }, [supabase]);
 
-  // ── 4. Acción de Like / Quitar Like ──
+    // Suscripción Realtime multicanal (PostgreSQL CDC + Broadcast instantáneo)
+    const channel = supabase.channel('cbta134_stats_sync')
+      .on('broadcast', { event: 'visit_logged' }, () => {
+        fetchCounts();
+      })
+      .on('broadcast', { event: 'like_toggled' }, () => {
+        fetchCounts();
+      })
+      .on('broadcast', { event: 'comment_added' }, () => {
+        fetchCounts();
+        loadComentarios();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'visitas' }, () => {
+        fetchCounts();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'likes' }, () => {
+        fetchCounts();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'comentarios' }, () => {
+        fetchCounts();
+        loadComentarios();
+      })
+      .subscribe();
+
+    // Actualización instantánea al volver a la pestaña
+    const handleFocus = () => {
+      fetchCounts();
+      loadComentarios();
+    };
+    window.addEventListener('focus', handleFocus);
+
+    // Intervalo de respaldo cada 10 segundos
+    const interval = setInterval(fetchCounts, 10000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      window.removeEventListener('focus', handleFocus);
+      clearInterval(interval);
+    };
+  }, []);
+
+  // ── 5. Acción de Like / Quitar Like con Difusión en Vivo ──
   async function handleToggleLike() {
     if (likeLoading) return;
     setLikeLoading(true);
 
     try {
-      const sessionId = localStorage.getItem('cbta134_user_session') || 'anon';
+      let sessionId = localStorage.getItem('cbta134_device_id') || localStorage.getItem('cbta134_user_session');
+      if (!sessionId) {
+        sessionId = 'user_' + Math.random().toString(36).substring(2, 12);
+        localStorage.setItem('cbta134_device_id', sessionId);
+      }
 
       if (hasLiked) {
         // Quitar like
@@ -129,6 +156,18 @@ export default function CommunityInteractions() {
         setHasLiked(true);
         setLikes(prev => prev + 1);
       }
+
+      // Difundir evento de like en vivo
+      const channel = supabase.channel('cbta134_stats_sync');
+      channel.subscribe(status => {
+        if (status === 'SUBSCRIBED') {
+          channel.send({
+            type: 'broadcast',
+            event: 'like_toggled',
+            payload: {},
+          });
+        }
+      });
     } catch (err) {
       console.error('Error al cambiar like:', err);
     } finally {
@@ -136,7 +175,7 @@ export default function CommunityInteractions() {
     }
   }
 
-  // ── 5. Enviar Comentario ──
+  // ── 6. Enviar Comentario con Difusión en Vivo ──
   async function handleSubmitComment(e: React.FormEvent) {
     e.preventDefault();
     if (!nombre.trim() || !mensaje.trim() || enviando) return;
@@ -155,6 +194,18 @@ export default function CommunityInteractions() {
         setEnviadoOk(true);
         loadComentarios();
         setTimeout(() => setEnviadoOk(false), 4000);
+
+        // Difundir evento de nuevo comentario en vivo
+        const channel = supabase.channel('cbta134_stats_sync');
+        channel.subscribe(status => {
+          if (status === 'SUBSCRIBED') {
+            channel.send({
+              type: 'broadcast',
+              event: 'comment_added',
+              payload: {},
+            });
+          }
+        });
       } else {
         alert('No se pudo publicar tu mensaje. Intenta de nuevo.');
       }
