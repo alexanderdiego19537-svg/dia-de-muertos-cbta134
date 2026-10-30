@@ -110,7 +110,7 @@ export default function HeroSection() {
         ══════════════════════════════════════ */}
         {!isMobile && (
           <>
-            {/* FESTIVAL + ENTRE LA VIDA — detrás de catrina z=5 */}
+            {/* ENTRE LA VIDA — izquierda, detrás de catrina z=5 */}
             <motion.div
               style={{ position: 'absolute', top: '11%', left: 0, right: 0, zIndex: 5, pointerEvents: 'none', x: titlePX }}
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.2 }}
@@ -120,11 +120,10 @@ export default function HeroSection() {
                   <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: 'linear-gradient(to bottom, transparent, rgba(249,115,22,0.15), transparent)' }} />
                   <div>
                     <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: '0.25em', color: 'rgba(249,115,22,0.5)', marginBottom: 4, textTransform: 'uppercase' }}>2026</div>
-                    <h1 style={{ fontFamily: 'Cinzel, serif', fontWeight: 900, margin: 0, lineHeight: 0.92, letterSpacing: '-0.02em', fontSize: 'clamp(52px, 10vw, 145px)', color: 'white', textAlign: 'left', textShadow: '0 0 60px rgba(249,115,22,0.25), 0 2px 0 rgba(0,0,0,0.5)' }}>FESTIVAL</h1>
+                    <h1 style={{ fontFamily: 'Cinzel, serif', fontWeight: 900, margin: 0, lineHeight: 0.92, letterSpacing: '-0.02em', fontSize: 'clamp(38px, 7.5vw, 108px)', color: 'white', textAlign: 'left', textShadow: '0 0 60px rgba(249,115,22,0.25), 0 2px 0 rgba(0,0,0,0.5)' }}>ENTRE LA<br />VIDA</h1>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: '0.2em', color: 'rgba(249,115,22,0.5)', marginBottom: 4, textTransform: 'uppercase' }}>CBTA #134</div>
-                    <h1 style={{ fontFamily: 'Cinzel, serif', fontWeight: 900, margin: 0, lineHeight: 1.05, letterSpacing: '-0.01em', fontSize: 'clamp(20px, 3.8vw, 52px)', color: 'white', textAlign: 'right', textShadow: '0 0 40px rgba(249,115,22,0.2), 0 2px 0 rgba(0,0,0,0.6)' }}>ENTRE LA VIDA</h1>
                   </div>
                 </div>
               </div>
@@ -168,16 +167,13 @@ export default function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '0.25em', color: 'rgba(249,115,22,0.6)', marginBottom: 4, textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '0.25em', color: 'rgba(249,115,22,0.6)', marginBottom: 6, textTransform: 'uppercase' }}>
               CBTA #134 · 2026
             </div>
-            <h1 style={{ fontFamily: 'Cinzel, serif', fontWeight: 900, margin: 0, lineHeight: 0.88, letterSpacing: '-0.02em', fontSize: 'clamp(40px, 13vw, 75px)', color: 'white', textAlign: 'center', textShadow: '0 0 40px rgba(249,115,22,0.4), 0 2px 0 rgba(0,0,0,0.6)' }}>
-              FESTIVAL
-            </h1>
-            <h2 style={{ fontFamily: 'Cinzel, serif', fontWeight: 700, margin: '4px 0', lineHeight: 1.1, letterSpacing: '0.01em', fontSize: 'clamp(14px, 4.5vw, 28px)', color: 'rgba(255,255,255,0.7)', textAlign: 'center', textShadow: '0 0 20px rgba(249,115,22,0.3)' }}>
+            <h1 style={{ fontFamily: 'Cinzel, serif', fontWeight: 900, margin: 0, lineHeight: 1.0, letterSpacing: '-0.02em', fontSize: 'clamp(32px, 10vw, 62px)', color: 'white', textAlign: 'center', textShadow: '0 0 40px rgba(249,115,22,0.4), 0 2px 0 rgba(0,0,0,0.6)' }}>
               ENTRE LA VIDA
-            </h2>
-            <h1 style={{ fontFamily: 'Cinzel, serif', fontWeight: 900, margin: 0, lineHeight: 0.92, letterSpacing: '-0.02em', fontSize: 'clamp(28px, 9vw, 55px)', color: 'white', textAlign: 'center', textShadow: '0 0 60px rgba(249,115,22,0.6), 0 0 20px rgba(249,115,22,0.4), 0 2px 0 rgba(0,0,0,0.8)', filter: 'drop-shadow(0 0 14px rgba(249,115,22,0.5))' }}>
+            </h1>
+            <h1 style={{ fontFamily: 'Cinzel, serif', fontWeight: 900, margin: '4px 0 0', lineHeight: 0.92, letterSpacing: '-0.02em', fontSize: 'clamp(28px, 9vw, 55px)', color: 'white', textAlign: 'center', textShadow: '0 0 60px rgba(249,115,22,0.6), 0 0 20px rgba(249,115,22,0.4), 0 2px 0 rgba(0,0,0,0.8)', filter: 'drop-shadow(0 0 14px rgba(249,115,22,0.5))' }}>
               Y LA MUERTE
             </h1>
           </motion.div>

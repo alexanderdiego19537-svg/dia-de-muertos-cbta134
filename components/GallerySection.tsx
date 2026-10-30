@@ -28,14 +28,10 @@ export default function GallerySection({ standalone = false, showViewAll = false
         </motion.div>
 
         <motion.h2 initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.1 }}
-          style={{ fontFamily: 'Cinzel, serif', fontWeight: 700, color: 'white', marginBottom: 10, lineHeight: 1.2, fontSize: 'clamp(28px, 4.5vw, 52px)' }}>
+          style={{ fontFamily: 'Cinzel, serif', fontWeight: 700, color: 'white', marginBottom: 44, lineHeight: 1.2, fontSize: 'clamp(28px, 4.5vw, 52px)' }}>
           Galería<br />
           <span style={{ background: 'linear-gradient(135deg, #F97316 0%, #EAB308 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Día de Muertos</span>
         </motion.h2>
-        <motion.p initial={{ opacity: 0 }} animate={isInView ? { opacity: 1 } : {}} transition={{ delay: 0.2 }}
-          style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'rgba(255,255,255,0.32)', marginBottom: 44, maxWidth: 480, lineHeight: 1.7 }}>
-          Próximamente se añadirán fotografías del evento del 28 de octubre. Por ahora, disfruta de estas imágenes de inspiración.
-        </motion.p>
 
         {/* Photo grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>

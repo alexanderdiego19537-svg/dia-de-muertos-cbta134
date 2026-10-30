@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import PageLayout from '@/components/PageLayout';
-import GallerySection from '@/components/GallerySection';
+import GaleriaClient from './GaleriaClient';
 
 export const metadata: Metadata = {
   title: 'Galería — CBTA #134',
@@ -12,7 +12,7 @@ export default function GaleriaPage() {
       prevPage={{ href: '/concurso', label: 'Concurso' }}
       nextPage={{ href: '/ubicacion', label: 'Ubicación' }}
     >
-      <GallerySection standalone showViewAll />
+      <GaleriaClient />
     </PageLayout>
   );
 }
