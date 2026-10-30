@@ -80,7 +80,7 @@ export default function Header({ onMenuOpen, onEventOpen, onChatOpen }: HeaderPr
   }, []);
 
   return (
-    <header className={`relative z-50 flex items-center justify-between w-full px-4 sm:px-6 py-3.5 md:px-12 transition-all duration-300 ${scrolled ? 'bg-black/70 backdrop-blur-md border-b border-orange-900/30' : 'bg-black/40 backdrop-blur-md border-b border-white/5'}`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between w-full px-4 sm:px-6 py-3 md:px-12 transition-all duration-300 ${scrolled ? 'bg-black/90 backdrop-blur-md border-b border-orange-500/35 shadow-2xl' : 'bg-black/40 backdrop-blur-md border-b border-white/5'}`}>
       {/* Left: Brand Logo + Menu + Local Time */}
       <div className="flex items-center gap-3 sm:gap-4">
         {/* Logo en la esquina superior izquierda */}
@@ -103,13 +103,18 @@ export default function Header({ onMenuOpen, onEventOpen, onChatOpen }: HeaderPr
         {/* Separador vertical sutil */}
         <div className="h-6 w-px bg-white/10 hidden sm:block" />
 
-        {/* Botón Menú */}
+        {/* Botón Menú (las tres rayitas) — siempre visible y accesible al hacer scroll */}
         <button
           onClick={onMenuOpen}
-          className="flex items-center gap-2 px-3.5 py-1.5 border rounded-full border-white/10 hover:border-orange-500/50 bg-white/5 hover:bg-orange-500/10 transition-all duration-300 text-sm text-white/70 hover:text-white"
+          className={`flex items-center gap-2 px-3.5 py-1.5 border rounded-full transition-all duration-300 text-sm cursor-pointer ${
+            scrolled
+              ? 'border-orange-500/50 bg-orange-500/15 text-orange-200 hover:bg-orange-500/25 hover:border-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.25)]'
+              : 'border-white/10 hover:border-orange-500/50 bg-white/5 hover:bg-orange-500/10 text-white/70 hover:text-white'
+          }`}
+          title="Abrir menú de navegación"
         >
-          <Menu size={16} />
-          <span className="hidden sm:block font-mono text-xs tracking-widest uppercase">Menú</span>
+          <Menu size={16} className={scrolled ? 'text-orange-400' : 'text-current'} />
+          <span className="hidden sm:block font-mono text-xs tracking-widest uppercase font-semibold">Menú</span>
         </button>
 
         {/* Hora en Tlaxcala */}

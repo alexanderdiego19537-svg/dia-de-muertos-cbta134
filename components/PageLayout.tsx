@@ -56,7 +56,7 @@ export default function PageLayout({ children, prevPage, nextPage, showFooter = 
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease: 'easeOut' }}
-          style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+          style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingTop: 'clamp(58px, 8vh, 72px)' }}
         >
           {children}
         </motion.main>

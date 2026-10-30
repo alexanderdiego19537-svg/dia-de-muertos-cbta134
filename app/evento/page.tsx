@@ -203,25 +203,29 @@ export default function EventoPage() {
       {/* ── BG global ── */}
       <div style={{ minHeight: '100vh', backgroundColor: '#080208', color: 'white', fontFamily: 'Inter, sans-serif' }}>
 
-        {/* ── HEADER ── */}
+        {/* ── HEADER STICKY (Siempre visible al hacer scroll) ── */}
         <header style={{
-          position: 'sticky', top: 0, zIndex: 30,
-          background: 'rgba(8,2,8,0.88)',
-          backdropFilter: 'blur(18px)',
-          borderBottom: '1px solid rgba(249,115,22,0.12)',
+          position: 'sticky', top: 0, zIndex: 50,
+          background: 'rgba(8,2,8,0.92)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(249,115,22,0.25)',
+          boxShadow: '0 8px 30px rgba(0,0,0,0.85)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: 'clamp(12px,2vw,20px) clamp(16px,5vw,48px)',
+          padding: 'clamp(10px,1.8vw,16px) clamp(16px,5vw,48px)',
         }}>
           {/* Botón menú */}
           <button
             onClick={() => setIsMenuOpen(true)}
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
-              padding: '8px 16px', borderRadius: 999,
-              border: '1px solid rgba(255,255,255,0.1)',
-              background: 'rgba(255,255,255,0.04)',
-              color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontSize: 13,
+              padding: '7px 16px', borderRadius: 999,
+              border: '1px solid rgba(249,115,22,0.4)',
+              background: 'rgba(249,115,22,0.12)',
+              color: 'white', cursor: 'pointer', fontSize: 13,
               fontFamily: 'JetBrains Mono, monospace',
+              fontWeight: 600,
+              boxShadow: '0 0 12px rgba(249,115,22,0.2)',
+              transition: 'all 0.2s',
             }}
           >
             <span style={{ fontSize: 16 }}>☰</span> Menú
