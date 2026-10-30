@@ -3,7 +3,10 @@
 import { useState, useEffect, Suspense } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Skull, Lock, Mail, User, ShieldCheck, ArrowRight, Loader2, Sparkles, AlertCircle, CheckCircle2, Home } from 'lucide-react';
+import {
+  Skull, Lock, Mail, User, ShieldCheck, ArrowRight,
+  Loader2, AlertCircle, CheckCircle2, Home, Eye, EyeOff, Info
+} from 'lucide-react';
 import Link from 'next/link';
 
 const EDITOR_PIN = 'CBTA134_EDITOR_2026';
@@ -18,17 +21,22 @@ function LoginFormContent() {
   const [mode, setMode]               = useState<'login' | 'register'>('login');
   const [roleIntent, setRoleIntent]   = useState<'user' | 'editor'>('user');
   
-  // Campos
+  // Campos del formulario
   const [fullName, setFullName]       = useState('');
   const [email, setEmail]             = useState('');
   const [password, setPassword]       = useState('');
   const [editorKey, setEditorKey]     = useState('');
   
+  // Visibilidad de contraseñas
+  const [showPassword, setShowPassword]   = useState(false);
+  const [showEditorKey, setShowEditorKey] = useState(false);
+
+  // Estados de carga y respuesta
   const [loading, setLoading]         = useState(false);
   const [error, setError]             = useState('');
   const [success, setSuccess]         = useState('');
 
-  // Si ya tiene sesión, redirigir según su rol
+  // Si ya tiene sesión activa, redirigir automáticamente
   useEffect(() => {
     async function checkSession() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -58,45 +66,47 @@ function LoginFormContent() {
     setLoading(true);
 
     try {
-      // 1. Si quiere entrar como editor, validar clave de editor
-      if (roleIntent === 'editor' && editorKey.trim() !== EDITOR_PIN) {
-        setError('La contraseña de editor es incorrecta. Si no eres editor, ingresa como Visitante.');
-        setLoading(false);
-        return;
-      }
-
       if (mode === 'login') {
-        // ── INICIAR SESIÓN ──
+        // ── 1. INICIAR SESIÓN ──
         const { data, error: authErr } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password,
         });
 
         if (authErr) {
-          setError(
-            authErr.message.includes('Invalid login credentials')
-              ? 'Correo o contraseña incorrectos.'
-              : authErr.message
-          );
+          if (authErr.message.includes('Invalid login credentials')) {
+            setError('Correo o contraseña incorrectos. Verifica que tus datos estén bien escritos.');
+          } else if (authErr.message.includes('Email not confirmed')) {
+            setError('Tu cuenta aún no ha sido confirmada por correo.');
+          } else {
+            setError(authErr.message);
+          }
           setLoading(false);
           return;
         }
 
         if (data.user) {
-          // Obtener perfil
+          // Obtener rol del perfil
           const { data: profile } = await supabase
             .from('profiles')
             .select('role')
             .eq('id', data.user.id)
             .maybeSingle();
 
-          // Si seleccionó modo editor y puso la clave correcta, actualizar su rol a editor
-          if (roleIntent === 'editor' && editorKey.trim() === EDITOR_PIN) {
+          // Si seleccionó que quería entrar a editar e ingresó la clave
+          if (roleIntent === 'editor') {
+            if (editorKey.trim() !== EDITOR_PIN) {
+              setError('Contraseña de editor incorrecta. Si eres visitante normal, selecciona "Visitante".');
+              setLoading(false);
+              return;
+            }
+            // Promover a editor si no es admin
             if (profile?.role !== 'admin') {
-              await supabase
-                .from('profiles')
-                .update({ role: 'editor' })
-                .eq('id', data.user.id);
+              await supabase.from('profiles').upsert({
+                id: data.user.id,
+                email: data.user.email,
+                role: 'editor',
+              });
             }
             router.push('/editor');
             return;
@@ -111,14 +121,27 @@ function LoginFormContent() {
           }
         }
       } else {
-        // ── REGISTRO DE CUENTA NUEVA ──
+        // ── 2. REGISTRARSE (NUEVA CUENTA) ──
         if (!fullName.trim()) {
-          setError('Por favor escribe tu nombre completo.');
+          setError('Por favor escribe tu nombre completo para identificar tus comentarios.');
           setLoading(false);
           return;
         }
 
-        const initialRole = roleIntent === 'editor' && editorKey.trim() === EDITOR_PIN ? 'editor' : 'user';
+        if (password.length < 6) {
+          setError('La contraseña debe tener al menos 6 caracteres.');
+          setLoading(false);
+          return;
+        }
+
+        // Si quiere registrarse como editor, verificar clave
+        if (roleIntent === 'editor' && editorKey.trim() !== EDITOR_PIN) {
+          setError('La contraseña de editor es incorrecta. Si eres visitante, elige "Visitante".');
+          setLoading(false);
+          return;
+        }
+
+        const initialRole = roleIntent === 'editor' ? 'editor' : 'user';
 
         const { data, error: signUpErr } = await supabase.auth.signUp({
           email: email.trim(),
@@ -132,29 +155,49 @@ function LoginFormContent() {
         });
 
         if (signUpErr) {
-          setError(signUpErr.message);
+          if (signUpErr.message.includes('already registered')) {
+            setError('Este correo ya tiene una cuenta registrada. Haz clic en "Iniciar Sesión" arriba.');
+          } else if (signUpErr.message.includes('Database error')) {
+            setError('Hubo un detalle en la base de datos de Supabase. Aplica el script SQL de permisos para activar el registro.');
+          } else {
+            setError(signUpErr.message);
+          }
           setLoading(false);
           return;
         }
 
-        // Si se auto-inició sesión
-        if (data.session) {
-          setSuccess('¡Cuenta creada con éxito! Redirigiendo...');
-          setTimeout(() => {
-            if (initialRole === 'editor') {
-              router.push('/editor');
-            } else {
-              router.push(returnTo);
-            }
-          }, 1200);
-        } else {
-          setSuccess('Cuenta creada. Ya puedes iniciar sesión con tu correo y contraseña.');
-          setMode('login');
+        // Si se creó y tiene sesión o usuario
+        if (data.user) {
+          // Asegurar perfil directamente desde el cliente como respaldo
+          try {
+            await supabase.from('profiles').upsert({
+              id: data.user.id,
+              email: data.user.email,
+              full_name: fullName.trim(),
+              role: initialRole,
+            });
+          } catch {
+            // No bloquear
+          }
+
+          if (data.session) {
+            setSuccess('¡Cuenta creada con éxito! Entrando...');
+            setTimeout(() => {
+              if (initialRole === 'editor') {
+                router.push('/editor');
+              } else {
+                router.push(returnTo);
+              }
+            }, 1000);
+          } else {
+            setSuccess('¡Registro completado! Ahora inicia sesión con tu correo y tu contraseña recién creada.');
+            setMode('login');
+          }
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError('Ocurrió un error inesperado. Inténtalo de nuevo.');
+      setError('Ocurrió un error inesperado al conectar con el servidor.');
     } finally {
       setLoading(false);
     }
@@ -175,7 +218,7 @@ function LoginFormContent() {
       {/* Glow de fondo */}
       <div style={{
         position: 'fixed', inset: 0, pointerEvents: 'none',
-        background: 'radial-gradient(ellipse at 50% 30%, rgba(249,115,22,0.12) 0%, transparent 70%)',
+        background: 'radial-gradient(ellipse at 50% 25%, rgba(249,115,22,0.14) 0%, transparent 68%)',
       }} />
 
       {/* Botón flotante para regresar al inicio */}
@@ -196,52 +239,52 @@ function LoginFormContent() {
       </div>
 
       <div style={{
-        width: '100%', maxWidth: 440,
-        backgroundColor: 'rgba(15, 6, 15, 0.95)',
-        border: '1px solid rgba(249,115,22,0.22)',
+        width: '100%', maxWidth: 450,
+        backgroundColor: 'rgba(15, 6, 15, 0.96)',
+        border: '1px solid rgba(249,115,22,0.25)',
         borderRadius: 24,
-        padding: 'clamp(24px, 5vw, 40px)',
-        backdropFilter: 'blur(20px)',
+        padding: 'clamp(24px, 5vw, 36px)',
+        backdropFilter: 'blur(24px)',
         position: 'relative',
         zIndex: 1,
-        boxShadow: '0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(249,115,22,0.08)',
+        boxShadow: '0 24px 70px rgba(0,0,0,0.85), 0 0 35px rgba(249,115,22,0.1)',
       }}>
-        {/* Cabecera del formulario */}
-        <div style={{ textAlign: 'center', marginBottom: 26 }}>
+        {/* Cabecera */}
+        <div style={{ textAlign: 'center', marginBottom: 22 }}>
           <div style={{
             width: 58, height: 58, borderRadius: '50%',
             background: 'rgba(249,115,22,0.12)',
             border: '1px solid rgba(249,115,22,0.35)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 14px',
+            margin: '0 auto 12px',
             boxShadow: '0 0 20px rgba(249,115,22,0.2)',
           }}>
             <Skull size={28} color="#F97316" />
           </div>
           <h1 style={{
             fontFamily: 'Cinzel, serif', fontWeight: 900,
-            fontSize: 22, color: 'white', margin: '0 0 6px',
+            fontSize: 22, color: 'white', margin: '0 0 4px',
           }}>
             {mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
           </h1>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', margin: 0, lineHeight: 1.4 }}>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: 0 }}>
             CBTA #134 · Día de Muertos 2026
           </p>
         </div>
 
-        {/* Pestañas: Iniciar Sesión vs Crear Cuenta */}
+        {/* Pestañas: Iniciar Sesión vs Registrarse */}
         <div style={{
           display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6,
           background: 'rgba(255,255,255,0.04)',
           padding: 4, borderRadius: 12,
-          marginBottom: 20,
-          border: '1px solid rgba(255,255,255,0.06)',
+          marginBottom: 18,
+          border: '1px solid rgba(255,255,255,0.08)',
         }}>
           <button
             type="button"
-            onClick={() => { setMode('login'); setError(''); }}
+            onClick={() => { setMode('login'); setError(''); setSuccess(''); }}
             style={{
-              padding: '9px 14px', borderRadius: 9,
+              padding: '10px 14px', borderRadius: 9,
               border: 'none', cursor: 'pointer',
               background: mode === 'login' ? 'rgba(249,115,22,0.25)' : 'transparent',
               color: mode === 'login' ? 'white' : 'rgba(255,255,255,0.45)',
@@ -249,13 +292,13 @@ function LoginFormContent() {
               transition: 'all 0.2s',
             }}
           >
-            Iniciar Sesión
+            Ya tengo cuenta
           </button>
           <button
             type="button"
-            onClick={() => { setMode('register'); setError(''); }}
+            onClick={() => { setMode('register'); setError(''); setSuccess(''); }}
             style={{
-              padding: '9px 14px', borderRadius: 9,
+              padding: '10px 14px', borderRadius: 9,
               border: 'none', cursor: 'pointer',
               background: mode === 'register' ? 'rgba(249,115,22,0.25)' : 'transparent',
               color: mode === 'register' ? 'white' : 'rgba(255,255,255,0.45)',
@@ -263,14 +306,14 @@ function LoginFormContent() {
               transition: 'all 0.2s',
             }}
           >
-            Registrarse
+            Registrarme
           </button>
         </div>
 
-        {/* Selector de tipo de acceso: Visitante vs Editor */}
-        <div style={{ marginBottom: 20 }}>
-          <label style={{ fontSize: 11, fontFamily: 'JetBrains Mono, monospace', color: 'rgba(255,255,255,0.45)', display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-            ¿Cómo deseas ingresar?
+        {/* Selector de Rol: Visitante vs Editor */}
+        <div style={{ marginBottom: 18 }}>
+          <label style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', color: 'rgba(255,255,255,0.45)', display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            Tipo de acceso:
           </label>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             <button
@@ -278,17 +321,17 @@ function LoginFormContent() {
               onClick={() => { setRoleIntent('user'); setError(''); }}
               style={{
                 display: 'flex', alignItems: 'center', gap: 8,
-                padding: '10px 12px', borderRadius: 10,
+                padding: '9px 12px', borderRadius: 10,
                 border: roleIntent === 'user' ? '1px solid #F97316' : '1px solid rgba(255,255,255,0.08)',
                 background: roleIntent === 'user' ? 'rgba(249,115,22,0.12)' : 'rgba(255,255,255,0.02)',
                 color: roleIntent === 'user' ? 'white' : 'rgba(255,255,255,0.5)',
                 cursor: 'pointer', textAlign: 'left',
-                fontSize: 12, fontFamily: 'Inter, sans-serif',
+                fontSize: 12,
               }}
             >
               <User size={15} color={roleIntent === 'user' ? '#F97316' : 'currentColor'} />
               <div>
-                <span style={{ fontWeight: 600, display: 'block' }}>Visitante</span>
+                <span style={{ fontWeight: 600, display: 'block', fontSize: 12 }}>Visitante</span>
                 <span style={{ fontSize: 10, opacity: 0.6 }}>Comentar y ver</span>
               </div>
             </button>
@@ -298,32 +341,32 @@ function LoginFormContent() {
               onClick={() => { setRoleIntent('editor'); setError(''); }}
               style={{
                 display: 'flex', alignItems: 'center', gap: 8,
-                padding: '10px 12px', borderRadius: 10,
+                padding: '9px 12px', borderRadius: 10,
                 border: roleIntent === 'editor' ? '1px solid #F97316' : '1px solid rgba(255,255,255,0.08)',
                 background: roleIntent === 'editor' ? 'rgba(249,115,22,0.12)' : 'rgba(255,255,255,0.02)',
                 color: roleIntent === 'editor' ? 'white' : 'rgba(255,255,255,0.5)',
                 cursor: 'pointer', textAlign: 'left',
-                fontSize: 12, fontFamily: 'Inter, sans-serif',
+                fontSize: 12,
               }}
             >
               <ShieldCheck size={15} color={roleIntent === 'editor' ? '#F97316' : 'currentColor'} />
               <div>
-                <span style={{ fontWeight: 600, display: 'block' }}>Editor</span>
-                <span style={{ fontSize: 10, opacity: 0.6 }}>Subir contenido</span>
+                <span style={{ fontWeight: 600, display: 'block', fontSize: 12 }}>Editor</span>
+                <span style={{ fontSize: 10, opacity: 0.6 }}>Subir fotos y info</span>
               </div>
             </button>
           </div>
         </div>
 
-        {/* Mensajes de error o éxito */}
+        {/* Mensaje de error o éxito */}
         {error && (
           <div style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            padding: '10px 14px', borderRadius: 10,
-            background: 'rgba(220,38,38,0.12)', border: '1px solid rgba(220,38,38,0.3)',
-            color: '#FCA5A5', fontSize: 12, marginBottom: 16,
+            display: 'flex', alignItems: 'flex-start', gap: 8,
+            padding: '10px 12px', borderRadius: 10,
+            background: 'rgba(220,38,38,0.14)', border: '1px solid rgba(220,38,38,0.3)',
+            color: '#FCA5A5', fontSize: 12, marginBottom: 16, lineHeight: 1.4,
           }}>
-            <AlertCircle size={15} style={{ flexShrink: 0 }} />
+            <AlertCircle size={16} style={{ flexShrink: 0, marginTop: 1 }} />
             <span>{error}</span>
           </div>
         )}
@@ -331,22 +374,22 @@ function LoginFormContent() {
         {success && (
           <div style={{
             display: 'flex', alignItems: 'center', gap: 8,
-            padding: '10px 14px', borderRadius: 10,
-            background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)',
+            padding: '10px 12px', borderRadius: 10,
+            background: 'rgba(34,197,94,0.14)', border: '1px solid rgba(34,197,94,0.3)',
             color: '#86EFAC', fontSize: 12, marginBottom: 16,
           }}>
-            <CheckCircle2 size={15} style={{ flexShrink: 0 }} />
+            <CheckCircle2 size={16} style={{ flexShrink: 0 }} />
             <span>{success}</span>
           </div>
         )}
 
         {/* Formulario */}
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {/* Nombre completo (solo en registro) */}
+          {/* Nombre completo (solo en Registro) */}
           {mode === 'register' && (
             <div>
-              <label style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 6 }}>
-                Tu Nombre Completo (se mostrará en tus comentarios):
+              <label style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', display: 'block', marginBottom: 5 }}>
+                Tu Nombre Completo (así saldrá en tus comentarios):
               </label>
               <div style={{ position: 'relative' }}>
                 <input
@@ -354,9 +397,9 @@ function LoginFormContent() {
                   required
                   value={fullName}
                   onChange={e => setFullName(e.target.value)}
-                  placeholder="Ej: Alexander García"
+                  placeholder="Ej. Alexander García"
                   style={{
-                    width: '100%', padding: '11px 14px 11px 40px',
+                    width: '100%', padding: '10px 14px 10px 38px',
                     borderRadius: 10, background: 'rgba(255,255,255,0.05)',
                     border: '1px solid rgba(255,255,255,0.12)',
                     color: 'white', fontSize: 13, outline: 'none',
@@ -365,14 +408,14 @@ function LoginFormContent() {
                   onFocus={e => (e.target.style.borderColor = '#F97316')}
                   onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
                 />
-                <User size={15} color="rgba(255,255,255,0.35)" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
+                <User size={15} color="rgba(255,255,255,0.35)" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
               </div>
             </div>
           )}
 
-          {/* Correo electrónico */}
+          {/* Correo Electrónico */}
           <div>
-            <label style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 6 }}>
+            <label style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', display: 'block', marginBottom: 5 }}>
               Correo Electrónico:
             </label>
             <div style={{ position: 'relative' }}>
@@ -381,9 +424,9 @@ function LoginFormContent() {
                 required
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="tu_correo@ejemplo.com"
+                placeholder="tu_correo@gmail.com"
                 style={{
-                  width: '100%', padding: '11px 14px 11px 40px',
+                  width: '100%', padding: '10px 14px 10px 38px',
                   borderRadius: 10, background: 'rgba(255,255,255,0.05)',
                   border: '1px solid rgba(255,255,255,0.12)',
                   color: 'white', fontSize: 13, outline: 'none',
@@ -392,25 +435,33 @@ function LoginFormContent() {
                 onFocus={e => (e.target.style.borderColor = '#F97316')}
                 onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
               />
-              <Mail size={15} color="rgba(255,255,255,0.35)" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
+              <Mail size={15} color="rgba(255,255,255,0.35)" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
             </div>
           </div>
 
-          {/* Contraseña de la cuenta */}
+          {/* Campo Contraseña con explicación amigable y botón mostrar/ocultar */}
           <div>
-            <label style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 6 }}>
-              Contraseña:
-            </label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+              <label style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>
+                {mode === 'register' ? 'Crea una contraseña para esta web:' : 'Tu contraseña:'}
+              </label>
+              {mode === 'register' && (
+                <span style={{ fontSize: 10, color: 'rgba(249,115,22,0.8)', fontFamily: 'JetBrains Mono, monospace' }}>
+                  Mínimo 6 letras o números
+                </span>
+              )}
+            </div>
+
             <div style={{ position: 'relative' }}>
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"
                 minLength={6}
                 style={{
-                  width: '100%', padding: '11px 14px 11px 40px',
+                  width: '100%', padding: '10px 38px 10px 38px',
                   borderRadius: 10, background: 'rgba(255,255,255,0.05)',
                   border: '1px solid rgba(255,255,255,0.12)',
                   color: 'white', fontSize: 13, outline: 'none',
@@ -419,47 +470,84 @@ function LoginFormContent() {
                 onFocus={e => (e.target.style.borderColor = '#F97316')}
                 onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
               />
-              <Lock size={15} color="rgba(255,255,255,0.35)" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
+              <Lock size={15} color="rgba(255,255,255,0.35)" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
+              
+              {/* Botón ver/ocultar contraseña */}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  color: 'rgba(255,255,255,0.4)', padding: 4, display: 'flex', alignItems: 'center',
+                }}
+              >
+                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
             </div>
+
+            {/* Aclaración amigable para que no crean que es la contraseña de Google */}
+            {mode === 'register' && (
+              <p style={{
+                fontSize: 10, color: 'rgba(255,255,255,0.45)', margin: '5px 0 0', lineHeight: 1.4,
+                display: 'flex', alignItems: 'center', gap: 4,
+              }}>
+                <Info size={11} color="#F97316" style={{ flexShrink: 0 }} />
+                <span>Inventa una contraseña para esta página. <strong>NO</strong> es la clave de tu correo de Google ni de tus redes.</span>
+              </p>
+            )}
           </div>
 
-          {/* Clave de Editor (solo si seleccionó modo editor) */}
+          {/* Clave de Editor (solo si seleccionó Editor) */}
           {roleIntent === 'editor' && (
             <div style={{
               background: 'rgba(249,115,22,0.08)',
               border: '1px solid rgba(249,115,22,0.25)',
               borderRadius: 12, padding: '12px 14px',
             }}>
-              <label style={{ fontSize: 12, color: '#F97316', fontWeight: 600, display: 'block', marginBottom: 6 }}>
+              <label style={{ fontSize: 11, color: '#F97316', fontWeight: 600, display: 'block', marginBottom: 5 }}>
                 🔑 Contraseña de Acceso para Editores:
               </label>
-              <input
-                type="password"
-                required
-                value={editorKey}
-                onChange={e => setEditorKey(e.target.value)}
-                placeholder="Ingresa la clave de editor..."
-                style={{
-                  width: '100%', padding: '10px 12px',
-                  borderRadius: 8, background: 'rgba(0,0,0,0.4)',
-                  border: '1px solid rgba(249,115,22,0.3)',
-                  color: 'white', fontSize: 13, outline: 'none',
-                  boxSizing: 'border-box',
-                }}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showEditorKey ? 'text' : 'password'}
+                  required
+                  value={editorKey}
+                  onChange={e => setEditorKey(e.target.value)}
+                  placeholder="Ingresa la clave de editor..."
+                  style={{
+                    width: '100%', padding: '9px 38px 9px 12px',
+                    borderRadius: 8, background: 'rgba(0,0,0,0.5)',
+                    border: '1px solid rgba(249,115,22,0.3)',
+                    color: 'white', fontSize: 13, outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowEditorKey(!showEditorKey)}
+                  style={{
+                    position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: 'rgba(255,255,255,0.4)', padding: 4, display: 'flex', alignItems: 'center',
+                  }}
+                >
+                  {showEditorKey ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
+              </div>
               <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', display: 'block', marginTop: 4 }}>
-                Requerida para acceder al panel de subida de fotos y eventos.
+                Requerida para que puedas subir fotos a la galería y modificar el programa.
               </span>
             </div>
           )}
 
-          {/* Botón de envío */}
+          {/* Botón Principal */}
           <button
             type="submit"
             disabled={loading}
             style={{
-              marginTop: 10,
-              padding: '13px', borderRadius: 12,
+              marginTop: 6,
+              padding: '12px', borderRadius: 12,
               background: 'linear-gradient(135deg, #F97316, #C2410C)',
               border: 'none', color: 'white', cursor: 'pointer',
               fontFamily: 'Cinzel, serif', fontWeight: 700, fontSize: 14,
@@ -479,11 +567,31 @@ function LoginFormContent() {
           </button>
         </form>
 
-        {/* Volver a la página principal */}
-        <div style={{ textAlign: 'center', marginTop: 22, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 16 }}>
-          <Link href="/" style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', textDecoration: 'none' }}>
-            ← Volver a la página principal sin iniciar sesión
-          </Link>
+        {/* Alternar entre login y registro */}
+        <div style={{ textAlign: 'center', marginTop: 18, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 14 }}>
+          {mode === 'login' ? (
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: 0 }}>
+              ¿Primera vez aquí?{' '}
+              <button
+                type="button"
+                onClick={() => { setMode('register'); setError(''); setSuccess(''); }}
+                style={{ background: 'none', border: 'none', color: '#F97316', cursor: 'pointer', fontWeight: 600, fontSize: 12 }}
+              >
+                Crea tu cuenta aquí
+              </button>
+            </p>
+          ) : (
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: 0 }}>
+              ¿Ya te habías registrado?{' '}
+              <button
+                type="button"
+                onClick={() => { setMode('login'); setError(''); setSuccess(''); }}
+                style={{ background: 'none', border: 'none', color: '#F97316', cursor: 'pointer', fontWeight: 600, fontSize: 12 }}
+              >
+                Inicia sesión aquí
+              </button>
+            </p>
+          )}
         </div>
       </div>
 
