@@ -12,16 +12,31 @@ export default async function EditorPage() {
     redirect('/login?returnTo=/editor');
   }
 
-  // Verificar si es editor o admin
-  const { data: profile } = await supabase
+  // 1. Verificar rol en la tabla profiles
+  let { data: profile } = await supabase
     .from('profiles')
     .select('role, full_name')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
-  if (!profile || (profile.role !== 'editor' && profile.role !== 'admin')) {
+  // 2. Respaldo: verificar también metadata del usuario
+  const metaRole = user.user_metadata?.role;
+  const userRole = profile?.role || metaRole;
+  const displayName = profile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0];
+
+  // Si en metadata es editor pero en profiles aún no estaba guardado, actualizarlo
+  if (userRole === 'editor' || userRole === 'admin') {
+    if (!profile || profile.role !== userRole) {
+      await supabase.from('profiles').upsert({
+        id: user.id,
+        email: user.email,
+        full_name: displayName,
+        role: userRole,
+      });
+    }
+  } else {
     redirect('/login?error=no-editor');
   }
 
-  return <EditorDashboard user={user} profileName={profile?.full_name} />;
+  return <EditorDashboard user={user} profileName={displayName} />;
 }

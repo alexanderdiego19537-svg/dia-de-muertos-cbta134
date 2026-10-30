@@ -108,13 +108,15 @@ function LoginFormContent() {
                 role: 'editor',
               });
             }
-            // Ir directamente a la página principal con las herramientas de editor activas
-            router.push('/');
+            // Ir directamente al Panel de Editor
+            router.push('/editor');
             return;
           }
 
           if (profile?.role === 'admin') {
             router.push('/admin');
+          } else if (profile?.role === 'editor') {
+            router.push('/editor');
           } else {
             router.push(returnTo || '/');
           }
@@ -180,12 +182,16 @@ function LoginFormContent() {
           }
 
           if (data.session) {
-            setSuccess('¡Cuenta creada con éxito! Entrando a la página...');
+            setSuccess('¡Cuenta creada con éxito! Entrando...');
             setTimeout(() => {
-              router.push(returnTo || '/');
+              if (initialRole === 'editor') {
+                router.push('/editor');
+              } else {
+                router.push(returnTo || '/');
+              }
             }, 800);
           } else {
-            setSuccess('¡Registro completado! Ahora inicia sesión con tu correo y contraseña.');
+            setSuccess('¡Registro completado! Si tienes confirmación de correo activa, verifica tu bandeja; de lo contrario ya puedes Iniciar Sesión.');
             setMode('login');
           }
         }
