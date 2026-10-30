@@ -16,8 +16,10 @@ const InfoBot    = dynamic(() => import('./InfoBot'),    { ssr: false });
 const PAGES = [
   { href: '/',              label: 'Inicio' },
   { href: '/quienes-somos',label: 'Nosotros' },
+  { href: '/tradicion',    label: 'Tradición' },
   { href: '/programa',     label: 'Programa' },
   { href: '/concurso',     label: 'Concurso' },
+  { href: '/evento',       label: 'Evento' },
   { href: '/galeria',      label: 'Galería' },
   { href: '/ubicacion',    label: 'Ubicación' },
 ];

@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 export default function ProgramaPage() {
   return (
     <PageLayout
-      prevPage={{ href: '/quienes-somos', label: 'Quiénes Somos' }}
-      nextPage={{ href: '/galeria', label: 'Galería' }}
+      prevPage={{ href: '/tradicion', label: 'Tradición' }}
+      nextPage={{ href: '/concurso', label: 'Concurso' }}
     >
       <ProgramaSection standalone />
     </PageLayout>

@@ -18,6 +18,7 @@ interface NavMenuProps {
 const navItems = [
   { label: 'Inicio',        tag: 'Página principal',             href: '/',          anchor: true },
   { label: 'Quiénes Somos', tag: 'Nuestra Institución',          href: '/#quienes-somos', anchor: true },
+  { label: 'Tradición',     tag: 'Historia, Calendario y Altar', href: '/tradicion', anchor: false },
   { label: 'Programa',      tag: 'Miércoles 28 de Octubre 2026', href: '/programa',  anchor: false },
   { label: 'Concurso',      tag: 'Concurso de Ofrendas',         href: '/concurso',  anchor: false },
   { label: 'Evento',        tag: 'Fotos y Videos del Festival',  href: '/evento',    anchor: false },

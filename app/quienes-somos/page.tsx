@@ -10,7 +10,7 @@ export default function QuienesSomosPage() {
   return (
     <PageLayout
       prevPage={{ href: '/', label: 'Inicio' }}
-      nextPage={{ href: '/programa', label: 'Programa' }}
+      nextPage={{ href: '/tradicion', label: 'Tradición' }}
     >
       <AboutSection standalone />
     </PageLayout>
