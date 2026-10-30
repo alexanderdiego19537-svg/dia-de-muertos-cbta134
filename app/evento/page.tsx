@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
+import { Play, Zap, Clock, Film } from 'lucide-react';
 
 // Importaciones dinámicas para evitar errores SSR
 const NavMenu = dynamic(() => import('@/components/NavMenu'), { ssr: false });
@@ -90,13 +91,20 @@ const FOTOS: { src: string; caption: string; categoria: string }[] = [
 ];
 
 // =====================================================================
-// VIDEOS — Agrega tus videos aquí
-// Pon tus videos en /public/videos/  (video1.mp4, video2.mp4, etc.)
+// VIDEOS CORTOS / CÁPSULAS — Clips optimizados (15 a 30s)
 // =====================================================================
-const VIDEOS: { src: string; poster: string; titulo: string }[] = [
-  // ⬇ DESCOMENTA Y EDITA CUANDO TENGAS TUS VIDEOS ⬇
-  // { src: '/videos/desfile.mp4',     poster: '/images/evento/poster1.jpg', titulo: 'Desfile Contingente' },
-  // { src: '/videos/festival.mp4',    poster: '/images/evento/poster2.jpg', titulo: 'Festival Cultural'  },
+export interface VideoClip {
+  src: string;
+  poster: string;
+  titulo: string;
+  duracion: string;
+  categoria: string;
+}
+
+const VIDEOS: VideoClip[] = [
+  // ⬇ Agrega aquí tus clips cortos (15-30 segundos). Formato MP4 o enlace optimizado. ⬇
+  // { src: '/videos/desfile-clip.mp4', poster: '/images/catrina-roses.jpg', titulo: 'Desfile de Catrinas', duracion: '0:25', categoria: 'Desfile' },
+  // { src: '/videos/ofrendas-clip.mp4', poster: '/images/catrina-candle.jpg', titulo: 'Concurso de Ofrendas', duracion: '0:30', categoria: 'Ofrendas' },
 ];
 
 const CATEGORIAS = ['Todas', 'Desfile', 'Ofrendas', 'Mercado', 'Festival'];
@@ -110,6 +118,7 @@ export default function EventoPage() {
   const [ambientColor, setAmbientColor] = useState('rgba(249,115,22,0.45)');
   const [categoriaActiva, setCategoriaActiva] = useState('Todas');
   const [fotoAmpliada, setFotoAmpliada] = useState<number | null>(null);
+  const [playingVideo, setPlayingVideo] = useState<number | null>(null);
 
   const fotosFiltradas = categoriaActiva === 'Todas'
     ? FOTOS
@@ -485,45 +494,140 @@ export default function EventoPage() {
             </div>
           </motion.section>
 
-          {/* ── SECCIÓN: Videos ── */}
+          {/* ── SECCIÓN: Videos Cortos / Cápsulas ── */}
           <motion.section
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.55 }}
             style={{ marginBottom: 72 }}
           >
-            <SectionTitle icon="🎬" title="Videos del Evento" />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
+              <SectionTitle icon="🎬" title="Cápsulas y Videos Cortos" />
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '4px 12px', borderRadius: 999,
+                background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.25)',
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#F97316',
+              }}>
+                <Zap size={12} />
+                <span>Carga Ligera · 0 KB Iniciales</span>
+              </div>
+            </div>
 
             {VIDEOS.length === 0 ? (
               <div style={{
-                padding: 40, borderRadius: 20, textAlign: 'center',
-                border: '1px dashed rgba(124,58,237,0.3)',
-                background: 'rgba(124,58,237,0.04)',
+                padding: '36px 24px', borderRadius: 20, textAlign: 'center',
+                border: '1px solid rgba(249,115,22,0.2)',
+                background: 'rgba(249,115,22,0.02)',
+                maxWidth: 680, margin: '0 auto',
               }}>
-                <div style={{ fontSize: 48, marginBottom: 12 }}>🎬</div>
-                <p style={{ fontFamily: 'Cinzel, serif', fontSize: 18, color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>
-                  Videos próximamente
+                <div style={{
+                  width: 52, height: 52, borderRadius: '50%',
+                  background: 'rgba(249,115,22,0.12)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  margin: '0 auto 12px', fontSize: 24,
+                }}>
+                  🎬
+                </div>
+                <h3 style={{ fontFamily: 'Cinzel, serif', fontSize: 18, color: 'white', margin: '0 0 6px', fontWeight: 700 }}>
+                  Cápsulas y Momentos en Video
+                </h3>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: '0 0 14px', lineHeight: 1.6, maxWidth: 480, marginLeft: 'auto', marginRight: 'auto' }}>
+                  Las cápsulas cortas (15 a 30 seg) del desfile de catrinas y concurso de ofrendas se publicarán en este espacio con reproducción bajo demanda sin consumir memoria ni datos previos.
                 </p>
-                <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'rgba(124,58,237,0.6)' }}>
-                  Copia tus videos a /public/videos/ y edita el arreglo VIDEOS
-                </p>
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  padding: '5px 14px', borderRadius: 999,
+                  background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'rgba(255,255,255,0.5)',
+                }}>
+                  <Clock size={12} style={{ color: '#F97316' }} />
+                  <span>Clips de 15 a 30 segundos · Formato optimizado</span>
+                </div>
               </div>
             ) : (
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
                 gap: 20,
               }}>
                 {VIDEOS.map((video, i) => (
-                  <div key={i} style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(124,58,237,0.2)', background: 'rgba(124,58,237,0.04)' }}>
-                    <video
-                      src={video.src}
-                      poster={video.poster}
-                      controls
-                      style={{ width: '100%', display: 'block', maxHeight: 280, objectFit: 'cover' }}
-                    />
-                    <div style={{ padding: '12px 16px' }}>
-                      <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 600, color: 'white', margin: 0 }}>{video.titulo}</p>
+                  <div
+                    key={i}
+                    style={{
+                      borderRadius: 18,
+                      overflow: 'hidden',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      background: 'rgba(255,255,255,0.025)',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                    }}
+                  >
+                    <div style={{ position: 'relative', width: '100%', height: 240, background: '#000' }}>
+                      {playingVideo === i ? (
+                        <video
+                          src={video.src}
+                          controls
+                          autoPlay
+                          playsInline
+                          preload="auto"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <div
+                          onClick={() => setPlayingVideo(i)}
+                          style={{ position: 'relative', width: '100%', height: '100%', cursor: 'pointer' }}
+                        >
+                          <Image
+                            src={video.poster}
+                            alt={video.titulo}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, 320px"
+                          />
+                          <div style={{
+                            position: 'absolute', inset: 0,
+                            background: 'rgba(0,0,0,0.45)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            transition: 'background 0.2s',
+                          }}>
+                            <div style={{
+                              width: 52, height: 52, borderRadius: '50%',
+                              background: 'linear-gradient(135deg, #F97316, #C2410C)',
+                              boxShadow: '0 0 20px rgba(249,115,22,0.6)',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              color: 'white',
+                            }}>
+                              <Play size={22} fill="white" style={{ marginLeft: 3 }} />
+                            </div>
+                          </div>
+                          <div style={{
+                            position: 'absolute', bottom: 10, right: 10,
+                            padding: '3px 8px', borderRadius: 6,
+                            background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(6px)',
+                            fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+                            color: 'white', border: '1px solid rgba(255,255,255,0.15)',
+                          }}>
+                            {video.duracion}
+                          </div>
+                          <div style={{
+                            position: 'absolute', top: 10, left: 10,
+                            padding: '3px 8px', borderRadius: 6,
+                            background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(6px)',
+                            fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+                            color: '#F97316', border: '1px solid rgba(249,115,22,0.3)',
+                          }}>
+                            {video.categoria}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ padding: '14px 16px' }}>
+                      <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 700, color: 'white', margin: '0 0 4px' }}>
+                        {video.titulo}
+                      </p>
+                      <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(255,255,255,0.45)' }}>
+                        Clip corto · Reproducción bajo demanda
+                      </span>
                     </div>
                   </div>
                 ))}

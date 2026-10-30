@@ -3,25 +3,54 @@
 import { useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
+let memoryCounted = false;
+
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function setCookie(name: string, value: string) {
+  if (typeof document === 'undefined') return;
+  const maxAge = 365 * 24 * 60 * 60; // 1 año (31,536,000 segundos)
+  document.cookie = `${name}=${encodeURIComponent(value)}; max-age=${maxAge}; path=/; SameSite=Lax`;
+}
+
 export default function VisitorTracker() {
   const hasExecuted = useRef(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (hasExecuted.current) return;
+    if (hasExecuted.current || memoryCounted) return;
     hasExecuted.current = true;
 
-    // 1. Verificar si este dispositivo ya fue registrado previamente
-    const alreadyCounted = localStorage.getItem('cbta134_device_visit_counted');
-    if (alreadyCounted) {
-      // Este dispositivo YA está contado. No hace ninguna petición a la base de datos.
+    // 1. Capas de verificación: Memoria, Cookies (1 año), LocalStorage y SessionStorage
+    const cookieCounted = getCookie('cbta134_visited');
+    let localCounted = false;
+    let sessionCounted = false;
+    try {
+      localCounted = !!localStorage.getItem('cbta134_visited');
+      sessionCounted = !!sessionStorage.getItem('cbta134_visited');
+    } catch {}
+
+    if (memoryCounted || cookieCounted || localCounted || sessionCounted) {
+      // Dispositivo ya contabilizado: bloqueo inmediato sin peticiones a la base de datos
       return;
     }
 
-    // 2. Obtener o generar el UUID único persistente de este dispositivo
-    let deviceId = localStorage.getItem('cbta134_device_id');
+    // 2. Obtener o crear UUID persistente único del dispositivo
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    
+    let deviceId = getCookie('cbta134_did');
+    if (!deviceId || !uuidRegex.test(deviceId)) {
+      try {
+        const stored = localStorage.getItem('cbta134_did');
+        if (stored && uuidRegex.test(stored)) {
+          deviceId = stored;
+        }
+      } catch {}
+    }
+
     if (!deviceId || !uuidRegex.test(deviceId)) {
       if (typeof crypto !== 'undefined' && crypto.randomUUID) {
         deviceId = crypto.randomUUID();
@@ -32,27 +61,32 @@ export default function VisitorTracker() {
           return v.toString(16);
         });
       }
-      localStorage.setItem('cbta134_device_id', deviceId);
     }
 
-    // 3. Marcar inmediatamente de forma local para bloquear cualquier reintento o recarga
-    localStorage.setItem('cbta134_device_visit_counted', 'true');
+    // 3. Marcar inmediatamente en TODAS las capas de persistencia local
+    memoryCounted = true;
+    setCookie('cbta134_visited', '1');
+    setCookie('cbta134_did', deviceId);
+    try {
+      localStorage.setItem('cbta134_visited', '1');
+      localStorage.setItem('cbta134_did', deviceId);
+      sessionStorage.setItem('cbta134_visited', '1');
+    } catch {}
 
-    // 4. Registrar de forma asíncrona en Supabase
+    // 4. Registrar de forma única en Supabase
     async function logVisit() {
       try {
         const supabase = createClient();
         const path = window.location.pathname || '/';
 
-        // Insertamos usando el deviceId como id (PRIMARY KEY).
-        // Si el id ya existía, PostgreSQL rechaza el duplicado con código 23505 y no se cuenta dos veces.
+        // PostgreSQL rechaza con código 23505 si el id ya existe (PRIMARY KEY)
         const { error } = await supabase.from('visitas').insert({
           id: deviceId,
           pagina: path,
         });
 
         if (!error || error.code === '23505') {
-          // Difundir en tiempo real para que todos los navegadores y el panel admin se actualicen al instante
+          // Difundir actualización en vivo
           const channel = supabase.channel('cbta134_stats_sync');
           channel.subscribe(status => {
             if (status === 'SUBSCRIBED') {
