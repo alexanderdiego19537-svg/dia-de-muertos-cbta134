@@ -2,22 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Images, Calendar, Megaphone, BarChart3, Eye, Heart, MessageSquare, Loader2, Sparkles } from 'lucide-react';
+import { X, Images, Film, Calendar, Megaphone, BarChart3, Eye, Heart, MessageSquare, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import AdminGallery from '@/components/admin/AdminGallery';
+import AdminVideos from '@/components/admin/AdminVideos';
 import AdminPrograma from '@/components/admin/AdminPrograma';
 import AdminAnuncios from '@/components/admin/AdminAnuncios';
 
 interface EditorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialTab?: 'gallery' | 'programa' | 'anuncios' | 'stats';
+  initialTab?: 'gallery' | 'videos' | 'programa' | 'anuncios' | 'stats';
   userEmail?: string;
   userName?: string;
 }
 
 export default function EditorModal({ isOpen, onClose, initialTab = 'gallery', userEmail, userName }: EditorModalProps) {
-  const [tab, setTab] = useState<'gallery' | 'programa' | 'anuncios' | 'stats'>(initialTab);
+  const [tab, setTab] = useState<'gallery' | 'videos' | 'programa' | 'anuncios' | 'stats'>(initialTab);
   const supabase = createClient();
 
   const [stats, setStats] = useState<{ views: number; likes: number }>({ views: 0, likes: 0 });
@@ -62,7 +63,7 @@ export default function EditorModal({ isOpen, onClose, initialTab = 'gallery', u
       <div style={{
         position: 'fixed', inset: 0, zIndex: 100,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '16px',
+        padding: '12px',
       }}>
         {/* Backdrop oscuro */}
         <motion.div
@@ -85,25 +86,26 @@ export default function EditorModal({ isOpen, onClose, initialTab = 'gallery', u
           transition={{ duration: 0.2 }}
           style={{
             position: 'relative', zIndex: 1,
-            width: '100%', maxWidth: 960, maxHeight: '90vh',
-            backgroundColor: '#0A040A',
+            width: '100%', maxWidth: 1020, maxHeight: '92vh',
+            backgroundColor: '#09030a',
             border: '1px solid rgba(249,115,22,0.3)',
-            borderRadius: 22,
-            boxShadow: '0 25px 80px rgba(0,0,0,0.9), 0 0 40px rgba(249,115,22,0.15)',
+            borderRadius: 20,
+            boxShadow: '0 25px 80px rgba(0,0,0,0.95), 0 0 40px rgba(249,115,22,0.15)',
             display: 'flex', flexDirection: 'column',
             overflow: 'hidden',
           }}
         >
-          {/* Header del modal */}
+          {/* Header estático del modal */}
           <div style={{
-            padding: '18px 24px',
+            padding: '14px 20px',
             borderBottom: '1px solid rgba(255,255,255,0.08)',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            background: 'rgba(255,255,255,0.02)',
+            background: 'rgba(18, 8, 18, 0.95)',
+            flexShrink: 0,
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{
-                width: 38, height: 38, borderRadius: 10,
+                width: 36, height: 36, borderRadius: 10,
                 background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.3)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: '#F97316', fontSize: 16,
@@ -111,8 +113,8 @@ export default function EditorModal({ isOpen, onClose, initialTab = 'gallery', u
                 ✏️
               </div>
               <div>
-                <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 17, fontWeight: 700, margin: 0, color: 'white' }}>
-                  Herramientas de Edición (En esta misma página)
+                <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 16, fontWeight: 700, margin: 0, color: 'white' }}>
+                  Herramientas de Edición
                 </h2>
                 <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', margin: 0 }}>
                   Editor: {userName || userEmail || 'Activo'} · CBTA #134
@@ -123,7 +125,7 @@ export default function EditorModal({ isOpen, onClose, initialTab = 'gallery', u
             <button
               onClick={onClose}
               style={{
-                width: 34, height: 34, borderRadius: '50%',
+                width: 32, height: 32, borderRadius: '50%',
                 background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
                 color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: 'pointer', transition: 'background 0.2s',
@@ -133,18 +135,20 @@ export default function EditorModal({ isOpen, onClose, initialTab = 'gallery', u
             </button>
           </div>
 
-          {/* Pestañas de edición */}
+          {/* Barra de Pestañas FIJA (Sticky) */}
           <div style={{
-            display: 'flex', gap: 6, padding: '0 20px',
-            borderBottom: '1px solid rgba(255,255,255,0.06)',
-            background: 'rgba(0,0,0,0.3)',
+            display: 'flex', gap: 6, padding: '0 16px',
+            borderBottom: '1px solid rgba(255,255,255,0.08)',
+            background: 'rgba(12, 5, 12, 0.98)',
             overflowX: 'auto',
+            flexShrink: 0,
           }}>
             {[
-              { id: 'gallery',  label: 'Subir Fotos', icon: Images },
-              { id: 'programa', label: 'Programa',    icon: Calendar },
-              { id: 'anuncios', label: 'Anuncios',    icon: Megaphone },
-              { id: 'stats',    label: 'Resumen (Vistas/Likes)', icon: BarChart3 },
+              { id: 'gallery',  label: '📸 Fotos',    icon: Images,    color: '#F97316' },
+              { id: 'videos',   label: '🎬 Videos',   icon: Film,      color: '#A855F7' },
+              { id: 'programa', label: '📅 Programa', icon: Calendar,  color: '#34D399' },
+              { id: 'anuncios', label: '📢 Anuncios', icon: Megaphone, color: '#FBBF24' },
+              { id: 'stats',    label: '📊 Métricas', icon: BarChart3,  color: '#60A5FA' },
             ].map(item => {
               const Icon = item.icon;
               const active = tab === item.id;
@@ -153,27 +157,34 @@ export default function EditorModal({ isOpen, onClose, initialTab = 'gallery', u
                   key={item.id}
                   onClick={() => setTab(item.id as typeof tab)}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: 8,
-                    padding: '12px 16px',
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    padding: '11px 14px',
                     border: 'none',
-                    borderBottom: active ? '2px solid #F97316' : '2px solid transparent',
-                    background: 'transparent',
-                    color: active ? '#F97316' : 'rgba(255,255,255,0.5)',
+                    borderBottom: active ? `2px solid ${item.color}` : '2px solid transparent',
+                    background: active ? 'rgba(255,255,255,0.04)' : 'transparent',
+                    color: active ? 'white' : 'rgba(255,255,255,0.5)',
                     cursor: 'pointer',
-                    fontFamily: 'Cinzel, serif', fontWeight: active ? 700 : 500,
-                    fontSize: 13, whiteSpace: 'nowrap',
+                    fontFamily: 'Inter, sans-serif', fontWeight: active ? 700 : 500,
+                    fontSize: 12.5, whiteSpace: 'nowrap',
+                    transition: 'all 0.15s',
                   }}
                 >
-                  <Icon size={15} />
+                  <Icon size={14} style={{ color: active ? item.color : 'rgba(255,255,255,0.4)' }} />
                   <span>{item.label}</span>
                 </button>
               );
             })}
           </div>
 
-          {/* Cuerpo del modal con scroll independiente */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+          {/* Cuerpo del modal con scroll independiente y limpio */}
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '20px clamp(14px, 3vw, 24px)',
+            background: 'linear-gradient(180deg, #09030a 0%, #0d040e 100%)',
+          }}>
             {tab === 'gallery'  && <AdminGallery />}
+            {tab === 'videos'   && <AdminVideos />}
             {tab === 'programa' && <AdminPrograma />}
             {tab === 'anuncios' && <AdminAnuncios />}
 
@@ -189,17 +200,17 @@ export default function EditorModal({ isOpen, onClose, initialTab = 'gallery', u
                   </div>
                 ) : (
                   <>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 24 }}>
                       <div style={{
                         background: 'rgba(96,165,250,0.06)', border: '1px solid rgba(96,165,250,0.2)',
-                        borderRadius: 14, padding: '20px', display: 'flex', alignItems: 'center', gap: 14,
+                        borderRadius: 14, padding: '18px', display: 'flex', alignItems: 'center', gap: 14,
                       }}>
                         <Eye size={28} color="#60A5FA" />
                         <div>
                           <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontFamily: 'JetBrains Mono, monospace' }}>
                             Visitas Registradas
                           </span>
-                          <p style={{ fontFamily: 'Cinzel, serif', fontWeight: 800, fontSize: 28, color: 'white', margin: '2px 0 0' }}>
+                          <p style={{ fontFamily: 'Cinzel, serif', fontWeight: 800, fontSize: 26, color: 'white', margin: '2px 0 0' }}>
                             {stats.views.toLocaleString()}
                           </p>
                         </div>
@@ -207,14 +218,14 @@ export default function EditorModal({ isOpen, onClose, initialTab = 'gallery', u
 
                       <div style={{
                         background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.2)',
-                        borderRadius: 14, padding: '20px', display: 'flex', alignItems: 'center', gap: 14,
+                        borderRadius: 14, padding: '18px', display: 'flex', alignItems: 'center', gap: 14,
                       }}>
                         <Heart size={28} color="#F87171" />
                         <div>
                           <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontFamily: 'JetBrains Mono, monospace' }}>
                             Me Gusta Totales
                           </span>
-                          <p style={{ fontFamily: 'Cinzel, serif', fontWeight: 800, fontSize: 28, color: 'white', margin: '2px 0 0' }}>
+                          <p style={{ fontFamily: 'Cinzel, serif', fontWeight: 800, fontSize: 26, color: 'white', margin: '2px 0 0' }}>
                             {stats.likes.toLocaleString()}
                           </p>
                         </div>
@@ -223,7 +234,7 @@ export default function EditorModal({ isOpen, onClose, initialTab = 'gallery', u
 
                     <div style={{
                       background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)',
-                      borderRadius: 14, padding: '20px',
+                      borderRadius: 14, padding: '18px',
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
                         <MessageSquare size={16} color="#34D399" />

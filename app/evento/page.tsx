@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { Play, Zap, Clock, Film, X } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 // Importaciones dinámicas para evitar errores SSR
 const NavMenu = dynamic(() => import('@/components/NavMenu'), { ssr: false });
@@ -120,9 +121,71 @@ export default function EventoPage() {
   const [fotoAmpliada, setFotoAmpliada] = useState<number | null>(null);
   const [playingVideo, setPlayingVideo] = useState<number | null>(null);
 
+  // Estados dinámicos conectados a Supabase
+  const [fotosList, setFotosList] = useState(FOTOS);
+  const [videosList, setVideosList] = useState<VideoClip[]>(VIDEOS);
+
+  useEffect(() => {
+    const supabase = createClient();
+    async function loadMedia() {
+      try {
+        // 1. Fotos desde Supabase (tabla 'gallery')
+        const { data: dbPhotos } = await supabase
+          .from('gallery')
+          .select('*')
+          .neq('visible', false)
+          .order('created_at', { ascending: false });
+
+        if (dbPhotos && dbPhotos.length > 0) {
+          const dynamicPhotos = dbPhotos.map(p => {
+            let cat = 'Festival';
+            const rawCat = (p.category || '').toLowerCase();
+            if (rawCat.includes('desfile') || rawCat.includes('catrina')) cat = 'Desfile';
+            else if (rawCat.includes('ofrenda') || rawCat.includes('altar') || rawCat.includes('tradicion')) cat = 'Ofrendas';
+            else if (rawCat.includes('mercado')) cat = 'Mercado';
+            else if (rawCat.includes('festival') || rawCat.includes('evento')) cat = 'Festival';
+            else if (p.category) {
+              cat = p.category.charAt(0).toUpperCase() + p.category.slice(1);
+            }
+
+            return {
+              src: p.image_url,
+              caption: p.title || 'Día de Muertos 2026 — CBTA #134',
+              categoria: cat,
+            };
+          });
+
+          // Fotos subidas por editor/admin van al inicio de la galería
+          setFotosList([...dynamicPhotos, ...FOTOS]);
+        }
+
+        // 2. Videos desde Supabase (tabla 'videos')
+        const { data: dbVideos } = await supabase
+          .from('videos')
+          .select('*')
+          .neq('visible', false)
+          .order('created_at', { ascending: false });
+
+        if (dbVideos && dbVideos.length > 0) {
+          setVideosList(dbVideos.map(v => ({
+            src: v.src,
+            poster: v.poster || '/images/catrina-roses.jpg',
+            titulo: v.titulo,
+            duracion: v.duracion || '0:30',
+            categoria: v.categoria || 'Festival',
+          })));
+        }
+      } catch (err) {
+        console.error('Error al cargar fotos o videos de evento:', err);
+      }
+    }
+
+    loadMedia();
+  }, []);
+
   const fotosFiltradas = categoriaActiva === 'Todas'
-    ? FOTOS
-    : FOTOS.filter(f => f.categoria === categoriaActiva);
+    ? fotosList
+    : fotosList.filter(f => f.categoria.toLowerCase() === categoriaActiva.toLowerCase());
 
   // Cerrar lightbox con Escape
   useEffect(() => {
@@ -419,17 +482,6 @@ export default function EventoPage() {
               ))}
             </div>
 
-            {/* Instrucción para agregar fotos */}
-            <div style={{
-              marginBottom: 20, padding: '12px 18px', borderRadius: 12,
-              border: '1px dashed rgba(249,115,22,0.3)',
-              background: 'rgba(249,115,22,0.05)',
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
-              color: 'rgba(249,115,22,0.7)',
-            }}>
-              💡 Para agregar tus fotos: copia los archivos a <code style={{ background: 'rgba(0,0,0,0.3)', padding: '1px 6px', borderRadius: 4 }}>/public/images/evento/</code> y edita el arreglo <code style={{ background: 'rgba(0,0,0,0.3)', padding: '1px 6px', borderRadius: 4 }}>FOTOS</code> en este archivo.
-            </div>
-
             {/* Grid de fotos */}
             <div style={{
               display: 'grid',
@@ -458,6 +510,7 @@ export default function EventoPage() {
                     fill
                     style={{ objectFit: 'cover', transition: 'transform 0.4s ease' }}
                     sizes="(max-width: 768px) 100vw, 33vw"
+                    unoptimized={foto.src.startsWith('http')}
                   />
                   {/* Hover overlay */}
                   <div style={{
@@ -514,7 +567,7 @@ export default function EventoPage() {
               </div>
             </div>
 
-            {VIDEOS.length === 0 ? (
+            {videosList.length === 0 ? (
               <div style={{
                 padding: '36px 24px', borderRadius: 20, textAlign: 'center',
                 border: '1px solid rgba(249,115,22,0.2)',
@@ -551,7 +604,7 @@ export default function EventoPage() {
                 gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
                 gap: 20,
               }}>
-                {VIDEOS.map((video, i) => (
+                {videosList.map((video, i) => (
                   <div
                     key={i}
                     style={{
@@ -597,6 +650,7 @@ export default function EventoPage() {
                             fill
                             className="object-cover"
                             sizes="(max-width: 768px) 100vw, 320px"
+                            unoptimized={video.poster.startsWith('http')}
                           />
                           <div style={{
                             position: 'absolute', inset: 0,
@@ -691,6 +745,7 @@ export default function EventoPage() {
                 alt={fotosFiltradas[fotoAmpliada].caption}
                 width={900} height={600}
                 style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 16 }}
+                unoptimized={fotosFiltradas[fotoAmpliada].src.startsWith('http')}
               />
               <div style={{
                 position: 'absolute', bottom: 0, left: 0, right: 0,

@@ -47,7 +47,7 @@ export default function GaleriaClient() {
         const { data, error } = await supabase
           .from('gallery')
           .select('*')
-          .eq('visible', true)
+          .neq('visible', false)
           .order('created_at', { ascending: false });
 
         if (!error && data && data.length > 0) {

@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { Images, Calendar, Megaphone, BarChart3, LogOut, ExternalLink, Eye, Heart, MessageSquare, Loader2 } from 'lucide-react';
+import { Images, Calendar, Megaphone, BarChart3, LogOut, ExternalLink, Eye, Heart, MessageSquare, Loader2, Film } from 'lucide-react';
 import Link from 'next/link';
 
 // Componentes reutilizados para edición de contenido
 import AdminGallery from '@/components/admin/AdminGallery';
+import AdminVideos from '@/components/admin/AdminVideos';
 import AdminPrograma from '@/components/admin/AdminPrograma';
 import AdminAnuncios from '@/components/admin/AdminAnuncios';
 
@@ -33,7 +34,7 @@ export default function EditorDashboard({ user, profileName }: EditorDashboardPr
   const router = useRouter();
   const supabase = createClient();
 
-  const [tab, setTab] = useState<'gallery' | 'programa' | 'anuncios' | 'stats'>('gallery');
+  const [tab, setTab] = useState<'gallery' | 'videos' | 'programa' | 'anuncios' | 'stats'>('gallery');
   const [stats, setStats] = useState<BasicStats>({ views: 0, likes: 0 });
   const [comentarios, setComentarios] = useState<BasicComment[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
@@ -161,10 +162,11 @@ export default function EditorDashboard({ user, profileName }: EditorDashboardPr
         overflowX: 'auto',
       }}>
         {[
-          { key: 'gallery',  label: 'Galería de Fotos', icon: Images },
-          { key: 'programa', label: 'Programa Cultural', icon: Calendar },
-          { key: 'anuncios', label: 'Anuncios y Avisos', icon: Megaphone },
-          { key: 'stats',    label: 'Resumen de Interacción', icon: BarChart3 },
+          { key: 'gallery',  label: '📸 Galería de Fotos', icon: Images },
+          { key: 'videos',   label: '🎬 Videos Cortos',   icon: Film },
+          { key: 'programa', label: '📅 Programa Cultural', icon: Calendar },
+          { key: 'anuncios', label: '📢 Anuncios y Avisos', icon: Megaphone },
+          { key: 'stats',    label: '📊 Métricas', icon: BarChart3 },
         ].map(item => {
           const Icon = item.icon;
           const active = tab === item.key;
@@ -197,6 +199,7 @@ export default function EditorDashboard({ user, profileName }: EditorDashboardPr
       {/* Contenido principal según la pestaña */}
       <main style={{ flex: 1, padding: 'clamp(20px, 4vw, 36px)' }}>
         {tab === 'gallery'  && <AdminGallery />}
+        {tab === 'videos'   && <AdminVideos />}
         {tab === 'programa' && <AdminPrograma />}
         {tab === 'anuncios' && <AdminAnuncios />}
 
