@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Upload, Trash2, Loader2, Image as ImageIcon, CheckCircle, AlertCircle } from 'lucide-react';
+import { Upload, Trash2, Loader2, Image as ImageIcon, CheckCircle, AlertCircle, Check } from 'lucide-react';
 import Image from 'next/image';
 
 interface GalleryItem {
@@ -21,6 +21,7 @@ export default function AdminGallery() {
   const [images, setImages]       = useState<GalleryItem[]>([]);
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting]   = useState<string | null>(null);
+  const [savingId, setSavingId]   = useState<string | null>(null);
   const [toast, setToast]         = useState<{ type: 'ok' | 'err'; msg: string } | null>(null);
   const [loading, setLoading]     = useState(true);
 
@@ -83,7 +84,7 @@ export default function AdminGallery() {
       const { error: dbError } = await supabase
         .from('gallery')
         .insert({
-          title: file.name.replace(/\.[^/.]+$/, ''),
+          title: file.name.replace(/\.[^/.]+$/, '').replace(/_/g, ' '),
           image_url: publicUrl,
           category: 'general',
           visible: true,
@@ -104,6 +105,27 @@ export default function AdminGallery() {
     if (successCount > 0) {
       showToast('ok', `${successCount} foto${successCount > 1 ? 's' : ''} subida${successCount > 1 ? 's' : ''} con éxito ✓`);
       loadImages();
+    }
+  }
+
+  function updateLocalTitle(id: string, newTitle: string) {
+    setImages(prev => prev.map(img => img.id === id ? { ...img, title: newTitle } : img));
+  }
+
+  async function handleSaveTitle(id: string, newTitle: string) {
+    setSavingId(id);
+    const cleanTitle = newTitle.trim() || 'Foto de galería';
+
+    const { error } = await supabase
+      .from('gallery')
+      .update({ title: cleanTitle })
+      .eq('id', id);
+
+    setSavingId(null);
+    if (!error) {
+      showToast('ok', 'Título guardado ✓');
+    } else {
+      showToast('err', 'Error al guardar el título');
     }
   }
 
@@ -143,7 +165,7 @@ export default function AdminGallery() {
           📸 Galería de Fotos (Supabase)
         </h1>
         <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: 0 }}>
-          Las fotos que subas aquí se almacenan en Supabase Storage y se reflejan en tiempo real en la página pública.
+          Sube tus fotos, escribe su título y aparecerán automáticamente en la página del festival.
         </p>
       </div>
 
@@ -207,74 +229,130 @@ export default function AdminGallery() {
       ) : (
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-          gap: 14,
+          gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
+          gap: 16,
         }}>
           {images.map(img => (
-            <div key={img.id} style={{
-              position: 'relative', borderRadius: 12, overflow: 'hidden',
-              aspectRatio: '1', background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.08)',
-            }}>
-              <Image
-                src={img.image_url}
-                alt={img.title || 'Foto de galería'}
-                fill
-                className="object-cover"
-                sizes="220px"
-                unoptimized
-              />
-
-              {/* Botón eliminar al hacer hover */}
-              <div style={{
-                position: 'absolute', inset: 0,
-                background: 'rgba(0,0,0,0)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'background 0.2s',
+            <div
+              key={img.id}
+              style={{
+                borderRadius: 14,
+                overflow: 'hidden',
+                background: 'rgba(255,255,255,0.025)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                display: 'flex',
+                flexDirection: 'column',
               }}
-                onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.background = 'rgba(0,0,0,0.6)'}
-                onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.background = 'rgba(0,0,0,0)'}
-              >
-                <button
-                  onClick={() => handleDelete(img)}
-                  disabled={deleting === img.id}
-                  title="Eliminar foto"
-                  style={{
-                    width: 38, height: 38, borderRadius: '50%',
-                    background: 'rgba(220,38,38,0.9)',
-                    border: 'none', cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    opacity: 0, transition: 'opacity 0.2s, transform 0.2s',
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLButtonElement).style.opacity = '1';
-                    (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.1)';
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLButtonElement).style.opacity = '0';
-                    (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)';
-                  }}
+            >
+              {/* Contenedor de la foto */}
+              <div style={{
+                position: 'relative', width: '100%', aspectRatio: '1',
+                background: 'rgba(0,0,0,0.5)',
+              }}>
+                <Image
+                  src={img.image_url}
+                  alt={img.title || 'Foto de galería'}
+                  fill
+                  className="object-cover"
+                  sizes="240px"
+                  unoptimized
+                />
+
+                {/* Botón eliminar al hacer hover */}
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  background: 'rgba(0,0,0,0)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'background 0.2s',
+                }}
+                  onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.background = 'rgba(0,0,0,0.6)'}
+                  onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.background = 'rgba(0,0,0,0)'}
                 >
-                  {deleting === img.id
-                    ? <Loader2 size={16} color="white" style={{ animation: 'spin 1s linear infinite' }} />
-                    : <Trash2 size={16} color="white" />
-                  }
-                </button>
+                  <button
+                    onClick={() => handleDelete(img)}
+                    disabled={deleting === img.id}
+                    title="Eliminar foto"
+                    style={{
+                      width: 38, height: 38, borderRadius: '50%',
+                      background: 'rgba(220,38,38,0.9)',
+                      border: 'none', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      opacity: 0, transition: 'opacity 0.2s, transform 0.2s',
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLButtonElement).style.opacity = '1';
+                      (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.1)';
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLButtonElement).style.opacity = '0';
+                      (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)';
+                    }}
+                  >
+                    {deleting === img.id
+                      ? <Loader2 size={16} color="white" style={{ animation: 'spin 1s linear infinite' }} />
+                      : <Trash2 size={16} color="white" />
+                    }
+                  </button>
+                </div>
               </div>
 
-              {/* Título de la imagen */}
+              {/* Campo para editar el título directamente */}
               <div style={{
-                position: 'absolute', bottom: 0, left: 0, right: 0,
-                background: 'linear-gradient(transparent, rgba(0,0,0,0.85))',
-                padding: '16px 10px 8px',
+                padding: '10px',
+                display: 'flex',
+                gap: 6,
+                alignItems: 'center',
+                background: 'rgba(15,5,15,0.7)',
+                borderTop: '1px solid rgba(255,255,255,0.06)',
               }}>
-                <p style={{
-                  fontSize: 11, color: 'white', margin: 0,
-                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                  fontFamily: 'Inter, sans-serif',
-                }}>
-                  {img.title || 'Foto'}
-                </p>
+                <input
+                  type="text"
+                  value={img.title || ''}
+                  placeholder="Escribe un título..."
+                  onChange={e => updateLocalTitle(img.id, e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      handleSaveTitle(img.id, img.title || '');
+                    }
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '6px 10px',
+                    borderRadius: 8,
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    color: 'white',
+                    fontSize: 12,
+                    outline: 'none',
+                    fontFamily: 'Inter, sans-serif',
+                    boxSizing: 'border-box',
+                  }}
+                  onFocus={e => (e.target.style.borderColor = 'rgba(249,115,22,0.5)')}
+                  onBlur={e => {
+                    (e.target.style.borderColor = 'rgba(255,255,255,0.1)');
+                    handleSaveTitle(img.id, img.title || '');
+                  }}
+                />
+
+                <button
+                  onClick={() => handleSaveTitle(img.id, img.title || '')}
+                  disabled={savingId === img.id}
+                  title="Guardar título"
+                  style={{
+                    width: 28, height: 28, borderRadius: 6,
+                    background: 'rgba(249,115,22,0.15)',
+                    border: '1px solid rgba(249,115,22,0.35)',
+                    color: '#F97316',
+                    cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  {savingId === img.id
+                    ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} />
+                    : <Check size={13} />
+                  }
+                </button>
               </div>
             </div>
           ))}
