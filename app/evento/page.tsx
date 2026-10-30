@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
-import { Play, Zap, Clock, Film } from 'lucide-react';
+import { Play, Zap, Clock, Film, X } from 'lucide-react';
 
 // Importaciones dinámicas para evitar errores SSR
 const NavMenu = dynamic(() => import('@/components/NavMenu'), { ssr: false });
@@ -564,14 +564,28 @@ export default function EventoPage() {
                   >
                     <div style={{ position: 'relative', width: '100%', height: 240, background: '#000' }}>
                       {playingVideo === i ? (
-                        <video
-                          src={video.src}
-                          controls
-                          autoPlay
-                          playsInline
-                          preload="auto"
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
+                        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                          <video
+                            src={video.src}
+                            controls
+                            autoPlay
+                            playsInline
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                          <button
+                            onClick={() => setPlayingVideo(null)}
+                            title="Cerrar video y volver a la portada"
+                            style={{
+                              position: 'absolute', top: 8, right: 8, zIndex: 10,
+                              background: 'rgba(0,0,0,0.75)', border: '1px solid rgba(255,255,255,0.25)',
+                              color: 'white', borderRadius: '50%', width: 28, height: 28,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
                       ) : (
                         <div
                           onClick={() => setPlayingVideo(i)}
