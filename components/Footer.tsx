@@ -148,29 +148,18 @@ export default function Footer() {
             ))}
           </div>
 
-          <div style={{ marginTop: 8, textAlign: 'center' }}>
+          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(255,255,255,0.22)', marginTop: 8, textAlign: 'center', lineHeight: 1.6 }}>
+            Desarrollado por{' '}
             <Link
               href="/autores"
-              style={{
-                fontFamily: 'JetBrains Mono, monospace',
-                fontSize: 11,
-                color: '#F97316',
-                textDecoration: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '6px 14px',
-                borderRadius: 999,
-                background: 'rgba(249,115,22,0.08)',
-                border: '1px solid rgba(249,115,22,0.25)',
-              }}
+              style={{ color: 'rgba(249,115,22,0.65)', textDecoration: 'none', transition: 'color 0.2s' }}
+              onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = '#F97316')}
+              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'rgba(249,115,22,0.65)')}
             >
-              👨‍💻 Conoce al Equipo de Autores (5° &quot;A&quot; Programación) →
+              Diego Alexander, Milca Antonio y Guadalupe (5° &quot;A&quot; Programación)
             </Link>
-            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(255,255,255,0.25)', marginTop: 8, margin: '8px 0 0', lineHeight: 1.6 }}>
-              Desarrollado con 💀 por Diego Alexander, Milca Antonio y Guadalupe · PAEC 2026 · Tetlanhocan, Tlaxcala
-            </p>
-          </div>
+            {' '}· PAEC 2026 · CBTA #134
+          </p>
         </div>
       </div>
     </footer>
