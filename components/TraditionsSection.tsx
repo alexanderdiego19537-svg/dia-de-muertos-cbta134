@@ -243,8 +243,8 @@ export default function TraditionsSection({ standalone = false }: TraditionsSect
         color: 'white',
       }}
     >
-      {/* ── Luces de fondo ambientales ── */}
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+      {/* ── Luces de fondo ambientales aisladas en GPU ── */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', transform: 'translate3d(0,0,0)', contain: 'strict' }}>
         <div style={{ position: 'absolute', top: '10%', right: '5%', width: 450, height: 450, borderRadius: '50%', filter: 'blur(140px)', background: 'radial-gradient(circle, rgba(249,115,22,0.12) 0%, transparent 70%)' }} />
         <div style={{ position: 'absolute', top: '45%', left: '5%', width: 400, height: 400, borderRadius: '50%', filter: 'blur(130px)', background: 'radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%)' }} />
         <div style={{ position: 'absolute', bottom: '10%', right: '15%', width: 380, height: 380, borderRadius: '50%', filter: 'blur(120px)', background: 'radial-gradient(circle, rgba(234,179,8,0.1) 0%, transparent 70%)' }} />

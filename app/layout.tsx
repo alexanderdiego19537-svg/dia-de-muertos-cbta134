@@ -36,7 +36,7 @@ export default function RootLayout({
       </head>
       <body style={{ backgroundColor: "#080208", color: "white", margin: 0, padding: 0 }}>
         {/* Petales de cempasúchil — toda la app, pointer-events:none, no tapa nada */}
-        <PetalRain count={38} />
+        <PetalRain count={24} />
         {/* Registro único de visita por dispositivo */}
         <VisitorTracker />
         {/* Banner de consentimiento legal de cookies LFPDPPP */}

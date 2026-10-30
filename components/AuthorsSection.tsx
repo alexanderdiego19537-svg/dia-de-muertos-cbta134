@@ -76,8 +76,8 @@ export default function AuthorsSection({ standalone = false }: AuthorsSectionPro
         color: 'white',
       }}
     >
-      {/* Luz tenue de fondo */}
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+      {/* Luz tenue de fondo aislada */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', transform: 'translate3d(0,0,0)', contain: 'strict' }}>
         <div style={{ position: 'absolute', top: '25%', left: '50%', transform: 'translateX(-50%)', width: '60%', height: '50%', borderRadius: '50%', filter: 'blur(160px)', background: 'radial-gradient(circle, rgba(249,115,22,0.06) 0%, transparent 70%)' }} />
       </div>
 

@@ -20,7 +20,7 @@ export default function AboutSection({ standalone = false }: AboutSectionProps) 
 
   return (
     <section id="quienes-somos" className="py-24 md:py-32 relative overflow-hidden" style={{ background: 'linear-gradient(180deg, #0A0404 0%, #0F0606 50%, #0A0404 100%)' }}>
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', transform: 'translate3d(0,0,0)', contain: 'strict' }}>
         <div style={{ position: 'absolute', right: 0, top: '25%', width: 380, height: 380, borderRadius: '50%', filter: 'blur(120px)', background: 'radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 70%)' }} />
         <div style={{ position: 'absolute', left: 0, bottom: '25%', width: 300, height: 300, borderRadius: '50%', filter: 'blur(100px)', background: 'radial-gradient(circle, rgba(249,115,22,0.14) 0%, transparent 70%)' }} />
       </div>

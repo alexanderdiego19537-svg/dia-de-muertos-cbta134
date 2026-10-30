@@ -154,9 +154,26 @@ export default function Aurora({
     const uAmp   = gl.getUniformLocation(prog, 'u_amp');
     const uBlend = gl.getUniformLocation(prog, 'u_blend');
 
+    let isVisible = true;
+    let isRunning = false;
+
+    function startLoop() {
+      if (!isRunning && isVisible) {
+        isRunning = true;
+        rafRef.current = requestAnimationFrame(frame);
+      }
+    }
+
+    function stopLoop() {
+      isRunning = false;
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    }
+
     function resize() {
       if (!canvas || !gl) return;
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5); // max 1.5x para performance
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.25); // max 1.25x para fluidez absoluta
       const w = Math.floor(canvas.clientWidth  * dpr);
       const h = Math.floor(canvas.clientHeight * dpr);
       if (canvas.width !== w || canvas.height !== h) {
@@ -167,8 +184,10 @@ export default function Aurora({
     }
 
     function frame() {
-      if (!gl) return;
-      resize();
+      if (!gl || !isVisible) {
+        isRunning = false;
+        return;
+      }
 
       const elapsed = (performance.now() - startRef.current) / 1000;
       const { colorStops: cs, speed: sp, amplitude: amp, blend: bl } = propsRef.current;
@@ -193,14 +212,28 @@ export default function Aurora({
     }
 
     resize();
-    rafRef.current = requestAnimationFrame(frame);
+    startLoop();
 
-    const ro = new ResizeObserver(resize);
+    const ro = new ResizeObserver(() => resize());
     ro.observe(canvas);
 
+    // Pausar render WebGL cuando el Hero no esté visible en pantalla (ahorro masivo de GPU al navegar)
+    const io = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        isVisible = entry.isIntersecting;
+        if (isVisible) {
+          startLoop();
+        } else {
+          stopLoop();
+        }
+      }
+    }, { threshold: 0.02 });
+    io.observe(canvas);
+
     return () => {
-      cancelAnimationFrame(rafRef.current);
+      stopLoop();
       ro.disconnect();
+      io.disconnect();
       try { gl.deleteProgram(prog); gl.deleteBuffer(buf); } catch {}
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps

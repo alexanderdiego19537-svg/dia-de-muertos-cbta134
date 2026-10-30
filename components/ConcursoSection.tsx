@@ -33,9 +33,11 @@ export default function ConcursoSection({ standalone = false }: ConcursoSectionP
       padding: 'clamp(32px,5vw,64px) clamp(16px,5vw,40px)',
       position: 'relative', overflow: 'hidden', flex: 1,
     }}>
-      {/* BG glows */}
-      <div style={{ position: 'absolute', top: '10%', left: '-10%', width: '50%', height: '50%', borderRadius: '50%', filter: 'blur(120px)', background: 'radial-gradient(circle, rgba(249,115,22,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: '10%', right: '-10%', width: '50%', height: '50%', borderRadius: '50%', filter: 'blur(120px)', background: 'radial-gradient(circle, rgba(124,58,237,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
+      {/* BG glows aislados */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', transform: 'translate3d(0,0,0)', contain: 'strict' }}>
+        <div style={{ position: 'absolute', top: '10%', left: '-10%', width: '50%', height: '50%', borderRadius: '50%', filter: 'blur(120px)', background: 'radial-gradient(circle, rgba(249,115,22,0.06) 0%, transparent 70%)' }} />
+        <div style={{ position: 'absolute', bottom: '10%', right: '-10%', width: '50%', height: '50%', borderRadius: '50%', filter: 'blur(120px)', background: 'radial-gradient(circle, rgba(124,58,237,0.06) 0%, transparent 70%)' }} />
+      </div>
 
       <div style={{ maxWidth: 960, margin: '0 auto', position: 'relative' }}>
 

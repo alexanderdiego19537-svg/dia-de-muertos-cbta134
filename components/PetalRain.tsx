@@ -37,18 +37,20 @@ function makePetals(count: number): Petal[] {
   }));
 }
 
-// Genera un SVG con el color naranja directamente en el fill (no filtros)
+// Genera un SVG con volumen y nervadura integrada en el vector (sin filtros CSS costosos)
 function makePetalUrl(color: string) {
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 32'><ellipse cx='9' cy='16' rx='7.5' ry='15.5' fill='${color}'/></svg>`;
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 34'><ellipse cx='10' cy='17' rx='8.5' ry='16' fill='${color}' opacity='0.95'/><ellipse cx='9' cy='15' rx='5' ry='12' fill='#FFD54F' opacity='0.35'/><path d='M10 2 Q10 17 10 32' stroke='#D97706' stroke-width='0.7' opacity='0.3'/></svg>`;
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 }
 
-export default function PetalRain({ count = 38 }: { count?: number }) {
+export default function PetalRain({ count = 24 }: { count?: number }) {
   const [petals, setPetals] = useState<Petal[]>([]);
 
-  // Genera los pétalos solo en el cliente (evita hydration mismatch)
+  // Genera los pétalos adaptados al dispositivo para 60 FPS fijos
   useEffect(() => {
-    setPetals(makePetals(count));
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const finalCount = isMobile ? Math.min(count, 14) : Math.min(count, 24);
+    setPetals(makePetals(finalCount));
   }, [count]);
 
   if (petals.length === 0) return null;
@@ -63,6 +65,7 @@ export default function PetalRain({ count = 38 }: { count?: number }) {
           pointerEvents: 'none',  /* ← nunca bloquea clics */
           zIndex: 9,              /* ← debajo de modales/header (z≥20) */
           overflow: 'hidden',
+          contain: 'strict',      /* Aislamiento de capas del navegador */
         }}
       >
         {petals.map((p) => (
@@ -74,11 +77,9 @@ export default function PetalRain({ count = 38 }: { count?: number }) {
               left: `${p.left}%`,
               width:  p.size,
               height: p.size * 1.8,
-              // SVG con color naranja directo en el fill — sin filtros CSS
               backgroundImage: makePetalUrl(p.color),
               backgroundSize: 'contain',
               backgroundRepeat: 'no-repeat',
-              filter: `drop-shadow(0 0 4px ${p.color}bb)`,
               /* CSS custom props para la animación */
               ['--r0' as string]: `${p.rotate}deg`,
               ['--r1' as string]: `${p.rotate + p.rotateDelta * 0.35}deg`,
@@ -88,6 +89,7 @@ export default function PetalRain({ count = 38 }: { count?: number }) {
               ['--op' as string]: p.opacity,
               animation: `petal-fall ${p.duration}s ease-in ${p.delay}s infinite`,
               willChange: 'transform, opacity',
+              transform: 'translate3d(0,0,0)',
             }}
           />
         ))}

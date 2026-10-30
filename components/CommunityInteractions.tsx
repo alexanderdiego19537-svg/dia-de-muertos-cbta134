@@ -319,8 +319,8 @@ export default function CommunityInteractions() {
         color: 'white',
       }}
     >
-      {/* Glow suave */}
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+      {/* Glow suave aislado */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', transform: 'translate3d(0,0,0)', contain: 'strict' }}>
         <div style={{
           position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)',
           width: '70%', height: '50%', borderRadius: '50%', filter: 'blur(160px)',

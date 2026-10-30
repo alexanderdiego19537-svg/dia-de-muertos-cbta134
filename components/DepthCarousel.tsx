@@ -86,6 +86,7 @@ export default function DepthCarousel({
             /* Compute slot relative to active (0 = front, 1 = first behind, ...) */
             const slot = ((i - active) % total + total) % total;
             const isVisible = slot < visible;
+            if (!isVisible) return null; // Evita renderizar elementos 3D ocultos innecesarios
 
             /* Z goes back as slot increases */
             const z = -slot * depth;

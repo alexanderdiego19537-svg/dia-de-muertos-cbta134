@@ -197,8 +197,8 @@ export default function HeroSection() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 1.3, ease: 'easeOut', delay: 0.4 }}
           >
-            <motion.div style={{ x: isMobile ? 0 : shiftX, y: isMobile ? 0 : shiftY }}>
-              <div style={{ position: 'absolute', bottom: '5%', left: '50%', transform: 'translateX(-50%)', width: '80%', height: '55%', borderRadius: '50%', filter: 'blur(55px)', background: `radial-gradient(ellipse, ${glowColor.replace('0.5', '0.3')} 0%, rgba(124,58,237,0.15) 50%, transparent 80%)`, zIndex: 0 }} />
+            <motion.div style={{ x: isMobile ? 0 : shiftX, y: isMobile ? 0 : shiftY, willChange: 'transform' }}>
+              <div style={{ position: 'absolute', bottom: '5%', left: '50%', transform: 'translateX(-50%)', width: '80%', height: '55%', borderRadius: '50%', filter: 'blur(40px)', background: `radial-gradient(ellipse, ${glowColor.replace('0.5', '0.35')} 0%, rgba(124,58,237,0.18) 50%, transparent 80%)`, zIndex: 0 }} />
               <div style={{ position: 'relative', zIndex: 1, width: isMobile ? 'clamp(180px, 68vw, 300px)' : 'clamp(200px, 38vw, 560px)', height: isMobile ? 'clamp(220px, 38vh, 340px)' : 'clamp(340px, 75vh, 850px)' }}>
                 <Image
                   src="/images/catrina-candle.jpg"
@@ -208,7 +208,7 @@ export default function HeroSection() {
                   className="object-contain object-bottom"
                   priority
                   loading="eager"
-                  style={{ mixBlendMode: 'screen', filter: 'drop-shadow(0 0 50px rgba(249,115,22,0.55)) drop-shadow(0 0 120px rgba(234,179,8,0.3)) brightness(1.1) contrast(1.08)' }}
+                  style={{ mixBlendMode: 'screen', filter: 'drop-shadow(0 0 45px rgba(249,115,22,0.6)) brightness(1.1) contrast(1.06)' }}
                 />
               </div>
             </motion.div>

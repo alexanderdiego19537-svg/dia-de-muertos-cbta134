@@ -12,7 +12,7 @@ export default function LocationSection({ standalone = false }: LocationSectionP
 
   return (
     <section id="ubicacion" style={{ padding: '96px 0', position: 'relative', overflow: 'hidden', backgroundColor: '#0A0404' }}>
-      <div style={{ position: 'absolute', bottom: 0, right: 0, width: 380, height: 380, borderRadius: '50%', filter: 'blur(130px)', background: 'radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: 0, right: 0, width: 380, height: 380, borderRadius: '50%', filter: 'blur(130px)', background: 'radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%)', pointerEvents: 'none', transform: 'translate3d(0,0,0)' }} />
 
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }} ref={ref}>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={isInView ? { opacity: 1, y: 0 } : {}}
