@@ -71,38 +71,42 @@ export default function PageLayout({ children, prevPage, nextPage, showFooter = 
           gap: 12,
         }}>
 
-          {/* Prev / Home */}
-          {prevPage ? (
-            <Link href={prevPage.href} style={{ textDecoration: 'none' }}>
-              <motion.div whileHover={{ x: -3 }} style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                padding: '10px clamp(12px,3vw,20px)', borderRadius: 999,
-                border: '1px solid rgba(255,255,255,0.12)',
-                background: 'rgba(255,255,255,0.04)',
-                cursor: 'pointer', color: 'rgba(255,255,255,0.7)',
-                fontFamily: 'JetBrains Mono, monospace',
-                fontSize: 'clamp(11px,2vw,13px)',
-              }}>
-                <ChevronLeft size={15} color="#F97316" />
-                {prevPage.label}
-              </motion.div>
-            </Link>
-          ) : (
+          {/* Prev + Home siempre visible */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {/* Botón Home — siempre presente */}
             <Link href="/" style={{ textDecoration: 'none' }}>
-              <motion.div whileHover={{ scale: 1.04 }} style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                padding: '10px clamp(12px,3vw,20px)', borderRadius: 999,
-                border: '1px solid rgba(249,115,22,0.2)',
-                background: 'rgba(249,115,22,0.06)',
-                cursor: 'pointer', color: 'rgba(249,115,22,0.8)',
+              <motion.div whileHover={{ scale: 1.06 }} style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '10px clamp(10px,2vw,16px)', borderRadius: 999,
+                border: '1px solid rgba(249,115,22,0.35)',
+                background: 'rgba(249,115,22,0.08)',
+                cursor: 'pointer', color: '#F97316',
                 fontFamily: 'JetBrains Mono, monospace',
-                fontSize: 'clamp(11px,2vw,13px)',
+                fontSize: 'clamp(11px,2vw,12px)',
               }}>
                 <Home size={13} />
                 Inicio
               </motion.div>
             </Link>
-          )}
+
+            {/* Botón Página Anterior — solo si existe */}
+            {prevPage && (
+              <Link href={prevPage.href} style={{ textDecoration: 'none' }}>
+                <motion.div whileHover={{ x: -3 }} style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '10px clamp(12px,3vw,20px)', borderRadius: 999,
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  background: 'rgba(255,255,255,0.04)',
+                  cursor: 'pointer', color: 'rgba(255,255,255,0.7)',
+                  fontFamily: 'JetBrains Mono, monospace',
+                  fontSize: 'clamp(11px,2vw,13px)',
+                }}>
+                  <ChevronLeft size={15} color="#F97316" />
+                  {prevPage.label}
+                </motion.div>
+              </Link>
+            )}
+          </div>
 
           {/* Dots */}
           <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
