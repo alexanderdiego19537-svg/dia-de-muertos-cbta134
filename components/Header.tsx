@@ -73,29 +73,43 @@ export default function Header({ onMenuOpen, onEventOpen, onChatOpen }: HeaderPr
   }, []);
 
   return (
-    <header className={`relative z-50 flex items-center justify-between w-full px-6 py-4 md:px-12 transition-all duration-300 ${scrolled ? 'bg-black/70 backdrop-blur-md border-b border-orange-900/30' : 'bg-black/40 backdrop-blur-md border-b border-white/5'}`}>
-      {/* Left: Menu + Time */}
-      <div className="flex items-center gap-3">
+    <header className={`relative z-50 flex items-center justify-between w-full px-4 sm:px-6 py-3.5 md:px-12 transition-all duration-300 ${scrolled ? 'bg-black/70 backdrop-blur-md border-b border-orange-900/30' : 'bg-black/40 backdrop-blur-md border-b border-white/5'}`}>
+      {/* Left: Brand Logo + Menu + Local Time */}
+      <div className="flex items-center gap-3 sm:gap-4">
+        {/* Logo en la esquina superior izquierda */}
+        <Link
+          href="/"
+          className="flex items-center gap-2.5 group transition-transform active:scale-95"
+          title="Ir al inicio — CBTA #134"
+        >
+          <CempasuchilLogo size={36} animated />
+          <div className="flex flex-col">
+            <span className="font-display text-xs font-bold tracking-[0.25em] text-orange-400 uppercase transition-colors group-hover:text-orange-300">
+              CBT #134
+            </span>
+            <span className="font-mono text-[9px] tracking-wider text-white/40 uppercase hidden sm:block">
+              Tetlanohcan
+            </span>
+          </div>
+        </Link>
+
+        {/* Separador vertical sutil */}
+        <div className="h-6 w-px bg-white/10 hidden sm:block" />
+
+        {/* Botón Menú */}
         <button
           onClick={onMenuOpen}
-          className="flex items-center gap-2 px-4 py-2 border rounded-full border-white/10 hover:border-orange-500/50 bg-white/5 hover:bg-orange-500/10 transition-all duration-300 text-sm text-white/70 hover:text-white"
+          className="flex items-center gap-2 px-3.5 py-1.5 border rounded-full border-white/10 hover:border-orange-500/50 bg-white/5 hover:bg-orange-500/10 transition-all duration-300 text-sm text-white/70 hover:text-white"
         >
           <Menu size={16} />
           <span className="hidden sm:block font-mono text-xs tracking-widest uppercase">Menú</span>
         </button>
-        <div className="hidden lg:flex items-center gap-2 font-mono text-xs text-white/50 bg-white/5 px-4 py-2 rounded-full">
+
+        {/* Hora en Tlaxcala */}
+        <div className="hidden xl:flex items-center gap-2 font-mono text-xs text-white/50 bg-white/5 px-3.5 py-1.5 rounded-full">
           <Clock size={12} className="text-orange-500" style={{ animation: 'pulse 2s infinite' }} />
           <span>/ Tlaxcala, MX — {currentTime || '10:00 AM'}</span>
         </div>
-      </div>
-
-      {/* Center: Logo */}
-      <div
-        className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 cursor-pointer"
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-      >
-        <CempasuchilLogo size={44} animated />
-        <span className="font-display text-xs tracking-[0.3em] text-orange-400/80 uppercase hidden sm:block">CBT #134</span>
       </div>
 
       {/* Right: CTA buttons + User */}
