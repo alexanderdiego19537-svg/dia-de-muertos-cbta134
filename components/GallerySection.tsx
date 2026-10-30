@@ -68,9 +68,15 @@ export default function GallerySection({ standalone = false, showViewAll = false
               onClick={() => setSelected(photo)}
               style={{ position: 'relative', height: 340, borderRadius: '20px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', boxShadow: '0 4px 30px rgba(0,0,0,0.5)' }}
             >
-              <Image src={photo.src} alt={photo.alt} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" style={{ filter: 'brightness(0.85)', transition: 'transform 0.7s ease' }}
-                onMouseEnter={e => ((e.target as HTMLElement).style.transform = 'scale(1.06)')}
-                onMouseLeave={e => ((e.target as HTMLElement).style.transform = 'scale(1)')} />
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-cover"
+                style={{ filter: 'brightness(0.85)', transition: 'transform 0.7s ease' }}
+                unoptimized={photo.src.startsWith('http')}
+              />
               {/* Hover overlay */}
               <div style={{ position: 'absolute', inset: 0, background: 'rgba(10,4,4,0)', transition: 'background 0.3s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 onMouseEnter={e => (e.currentTarget.style.background = 'rgba(10,4,4,0.45)')}
@@ -106,7 +112,7 @@ export default function GallerySection({ standalone = false, showViewAll = false
                   <X size={16} style={{ color: 'white' }} />
                 </button>
                 <div style={{ position: 'relative', width: '100%', height: '70vh', borderRadius: '20px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <Image src={selected.src} alt={selected.alt} fill className="object-contain" />
+                  <Image src={selected.src} alt={selected.alt} fill className="object-contain" unoptimized={selected.src.startsWith('http')} />
                 </div>
                 <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'rgba(255,255,255,0.4)', textAlign: 'center', marginTop: 12 }}>{selected.alt}</p>
               </div>

@@ -128,6 +128,7 @@ export default function DepthCarousel({
                   sizes={`${cardWidth}px`}
                   style={{ objectFit: 'cover' }}
                   priority={slot === 0}
+                  unoptimized={item.image.startsWith('http')}
                 />
 
                 {/* Tint overlay */}

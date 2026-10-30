@@ -222,6 +222,7 @@ export default function AdminGallery() {
                 fill
                 className="object-cover"
                 sizes="220px"
+                unoptimized
               />
 
               {/* Botón eliminar al hacer hover */}
