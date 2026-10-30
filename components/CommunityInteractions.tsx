@@ -2,31 +2,42 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, MessageSquare, Send, Eye, Sparkles, Loader2, CheckCircle2, User } from 'lucide-react';
+import { Heart, MessageSquare, Send, Eye, Sparkles, Loader2, CheckCircle2, User, Lock, Edit2, Trash2, Check, X, ArrowRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import Link from 'next/link';
 
 interface Comentario {
   id: string;
   nombre: string;
   mensaje: string;
+  user_id?: string;
   created_at: string;
 }
 
 export default function CommunityInteractions() {
   const supabase = createClient();
 
-  // ── Estados ──
+  // ── Estados de Interacción ──
   const [visitas, setVisitas] = useState<number>(0);
   const [likes, setLikes] = useState<number>(0);
   const [hasLiked, setHasLiked] = useState<boolean>(false);
   const [likeLoading, setLikeLoading] = useState<boolean>(false);
 
-  // Comentarios
+  // ── Estados de Usuario Autenticado ──
+  const [currentUser, setCurrentUser]       = useState<{ id: string; email?: string } | null>(null);
+  const [currentProfile, setCurrentProfile] = useState<{ full_name: string; role: string } | null>(null);
+  const [authLoading, setAuthLoading]       = useState(true);
+
+  // ── Comentarios ──
   const [comentarios, setComentarios] = useState<Comentario[]>([]);
-  const [nombre, setNombre] = useState('');
-  const [mensaje, setMensaje] = useState('');
-  const [enviando, setEnviando] = useState(false);
-  const [enviadoOk, setEnviadoOk] = useState(false);
+  const [mensaje, setMensaje]         = useState('');
+  const [enviando, setEnviando]       = useState(false);
+  const [enviadoOk, setEnviadoOk]     = useState(false);
+
+  // Edición de comentario propio
+  const [editingId, setEditingId]     = useState<string | null>(null);
+  const [editingText, setEditingText] = useState('');
+  const [savingEdit, setSavingEdit]   = useState(false);
 
   // ── 1. Cargar estadísticas reales (visitas y likes) ──
   async function fetchCounts() {
@@ -42,7 +53,38 @@ export default function CommunityInteractions() {
     }
   }
 
-  // ── 2. Cargar estado de Like del usuario actual ──
+  // ── 2. Cargar sesión y perfil del usuario ──
+  async function loadUserSession() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUser({ id: user.id, email: user.email });
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, role')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (profile) {
+          setCurrentProfile(profile);
+        } else {
+          setCurrentProfile({
+            full_name: user.email ? user.email.split('@')[0] : 'Visitante',
+            role: 'user',
+          });
+        }
+      } else {
+        setCurrentUser(null);
+        setCurrentProfile(null);
+      }
+    } catch (err) {
+      console.error('Error cargando usuario:', err);
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
+  // ── 3. Cargar estado de Like del usuario actual ──
   async function checkUserLike() {
     try {
       const sessionId = localStorage.getItem('cbta134_device_id') || localStorage.getItem('cbta134_user_session');
@@ -61,14 +103,14 @@ export default function CommunityInteractions() {
     }
   }
 
-  // ── 3. Cargar Comentarios ──
+  // ── 4. Cargar Comentarios ──
   async function loadComentarios() {
     try {
       const { data, error } = await supabase
         .from('comentarios')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(30);
 
       if (!error && data) {
         setComentarios(data);
@@ -78,44 +120,36 @@ export default function CommunityInteractions() {
     }
   }
 
-  // ── 4. Sincronización en Tiempo Real (WebSockets + Polling de Respaldo) ──
+  // ── 5. Sincronización en Tiempo Real (WebSockets + Polling de Respaldo) ──
   useEffect(() => {
     fetchCounts();
+    loadUserSession();
     checkUserLike();
     loadComentarios();
 
-    // Suscripción Realtime multicanal (PostgreSQL CDC + Broadcast instantáneo)
+    // Suscripción Realtime multicanal
     const channel = supabase.channel('cbta134_stats_sync')
-      .on('broadcast', { event: 'visit_logged' }, () => {
-        fetchCounts();
-      })
-      .on('broadcast', { event: 'like_toggled' }, () => {
-        fetchCounts();
-      })
+      .on('broadcast', { event: 'visit_logged' }, () => fetchCounts())
+      .on('broadcast', { event: 'like_toggled' }, () => fetchCounts())
       .on('broadcast', { event: 'comment_added' }, () => {
         fetchCounts();
         loadComentarios();
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'visitas' }, () => {
-        fetchCounts();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'likes' }, () => {
-        fetchCounts();
-      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'visitas' }, () => fetchCounts())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'likes' }, () => fetchCounts())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'comentarios' }, () => {
         fetchCounts();
         loadComentarios();
       })
       .subscribe();
 
-    // Actualización instantánea al volver a la pestaña
     const handleFocus = () => {
       fetchCounts();
       loadComentarios();
+      loadUserSession();
     };
     window.addEventListener('focus', handleFocus);
 
-    // Intervalo de respaldo cada 10 segundos
     const interval = setInterval(fetchCounts, 10000);
 
     return () => {
@@ -125,7 +159,7 @@ export default function CommunityInteractions() {
     };
   }, []);
 
-  // ── 5. Acción de Like / Quitar Like con Difusión en Vivo ──
+  // ── 6. Acción de Like / Quitar Like con Difusión en Vivo ──
   async function handleToggleLike() {
     if (likeLoading) return;
     setLikeLoading(true);
@@ -138,7 +172,6 @@ export default function CommunityInteractions() {
       }
 
       if (hasLiked) {
-        // Quitar like
         await supabase
           .from('likes')
           .delete()
@@ -148,7 +181,6 @@ export default function CommunityInteractions() {
         setHasLiked(false);
         setLikes(prev => Math.max(0, prev - 1));
       } else {
-        // Dar like
         await supabase
           .from('likes')
           .insert({ session_id: sessionId, pagina: 'home' });
@@ -157,7 +189,6 @@ export default function CommunityInteractions() {
         setLikes(prev => prev + 1);
       }
 
-      // Difundir evento de like en vivo
       const channel = supabase.channel('cbta134_stats_sync');
       channel.subscribe(status => {
         if (status === 'SUBSCRIBED') {
@@ -175,27 +206,29 @@ export default function CommunityInteractions() {
     }
   }
 
-  // ── 6. Enviar Comentario con Difusión en Vivo ──
+  // ── 7. Enviar Comentario (Autenticado con Nombre Automático) ──
   async function handleSubmitComment(e: React.FormEvent) {
     e.preventDefault();
-    if (!nombre.trim() || !mensaje.trim() || enviando) return;
+    if (!currentUser || !mensaje.trim() || enviando) return;
 
     setEnviando(true);
     try {
+      const authorName = currentProfile?.full_name || currentUser.email?.split('@')[0] || 'Visitante';
+
       const { error } = await supabase.from('comentarios').insert({
-        nombre: nombre.trim(),
+        nombre: authorName,
         mensaje: mensaje.trim(),
-        aprobado: true, // visible inmediatamente para mejor experiencia
+        user_id: currentUser.id,
+        aprobado: true,
       });
 
       if (!error) {
-        setNombre('');
         setMensaje('');
         setEnviadoOk(true);
         loadComentarios();
         setTimeout(() => setEnviadoOk(false), 4000);
 
-        // Difundir evento de nuevo comentario en vivo
+        // Difusión en tiempo real
         const channel = supabase.channel('cbta134_stats_sync');
         channel.subscribe(status => {
           if (status === 'SUBSCRIBED') {
@@ -207,12 +240,70 @@ export default function CommunityInteractions() {
           }
         });
       } else {
-        alert('No se pudo publicar tu mensaje. Intenta de nuevo.');
+        alert('No se pudo publicar tu mensaje. Verifica tu conexión e intenta de nuevo.');
       }
     } catch (err) {
       console.error('Error publicando comentario:', err);
     } finally {
       setEnviando(false);
+    }
+  }
+
+  // ── 8. Editar Comentario Propio ──
+  async function handleSaveEdit(id: string) {
+    if (!editingText.trim() || savingEdit) return;
+    setSavingEdit(true);
+
+    try {
+      const { error } = await supabase
+        .from('comentarios')
+        .update({ mensaje: editingText.trim() })
+        .eq('id', id);
+
+      if (!error) {
+        setComentarios(prev => prev.map(c => c.id === id ? { ...c, mensaje: editingText.trim() } : c));
+        setEditingId(null);
+        setEditingText('');
+
+        const channel = supabase.channel('cbta134_stats_sync');
+        channel.subscribe(status => {
+          if (status === 'SUBSCRIBED') {
+            channel.send({ type: 'broadcast', event: 'comment_added', payload: {} });
+          }
+        });
+      } else {
+        alert('No se pudo actualizar el comentario.');
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSavingEdit(false);
+    }
+  }
+
+  // ── 9. Eliminar Comentario Propio o Admin ──
+  async function handleDeleteComment(id: string) {
+    if (!confirm('¿Seguro que deseas eliminar este comentario?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('comentarios')
+        .delete()
+        .eq('id', id);
+
+      if (!error) {
+        setComentarios(prev => prev.filter(c => c.id !== id));
+        const channel = supabase.channel('cbta134_stats_sync');
+        channel.subscribe(status => {
+          if (status === 'SUBSCRIBED') {
+            channel.send({ type: 'broadcast', event: 'comment_added', payload: {} });
+          }
+        });
+      } else {
+        alert('No se pudo eliminar el comentario.');
+      }
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -230,7 +321,11 @@ export default function CommunityInteractions() {
     >
       {/* Glow suave */}
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-        <div style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', width: '70%', height: '50%', borderRadius: '50%', filter: 'blur(160px)', background: 'radial-gradient(circle, rgba(249,115,22,0.06) 0%, transparent 70%)' }} />
+        <div style={{
+          position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)',
+          width: '70%', height: '50%', borderRadius: '50%', filter: 'blur(160px)',
+          background: 'radial-gradient(circle, rgba(249,115,22,0.06) 0%, transparent 70%)',
+        }} />
       </div>
 
       <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
@@ -340,118 +435,164 @@ export default function CommunityInteractions() {
           alignItems: 'start',
         }}>
 
-          {/* Formulario */}
-          <div style={{
-            padding: '28px',
-            borderRadius: 20,
-            border: '1px solid rgba(255,255,255,0.08)',
-            background: 'rgba(255,255,255,0.02)',
-            backdropFilter: 'blur(12px)',
-          }}>
-            <h3 style={{
-              fontFamily: 'Cinzel, serif', fontWeight: 700, fontSize: 18, color: 'white', margin: '0 0 16px',
-            }}>
-              Escribe un mensaje en el muro
-            </h3>
-
-            <form onSubmit={handleSubmitComment} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div>
-                <label style={{
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
-                  color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 6,
-                  textTransform: 'uppercase', letterSpacing: '0.05em',
-                }}>
-                  Tu nombre o seudónimo
-                </label>
-                <input
-                  type="text"
-                  required
-                  maxLength={50}
-                  value={nombre}
-                  onChange={e => setNombre(e.target.value)}
-                  placeholder="Ej. Familia Hernández / Alumno de 3°A"
-                  style={{
-                    width: '100%', padding: '11px 14px',
-                    borderRadius: 10,
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    color: 'white', fontSize: 14, outline: 'none',
-                    boxSizing: 'border-box', fontFamily: 'Inter, sans-serif',
-                  }}
-                  onFocus={e => (e.target.style.borderColor = 'rgba(249,115,22,0.5)')}
-                  onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
-                />
+          {/* Columna Izquierda: Formulario o Invitación a Iniciar Sesión */}
+          <div>
+            {authLoading ? (
+              <div style={{ padding: 40, textAlign: 'center' }}>
+                <Loader2 size={24} color="#F97316" style={{ animation: 'spin 1s linear infinite' }} />
               </div>
-
-              <div>
-                <label style={{
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
-                  color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 6,
-                  textTransform: 'uppercase', letterSpacing: '0.05em',
-                }}>
-                  Mensaje o dedicatoria
-                </label>
-                <textarea
-                  required
-                  rows={4}
-                  maxLength={300}
-                  value={mensaje}
-                  onChange={e => setMensaje(e.target.value)}
-                  placeholder="Escribe tus palabras sobre el evento, las ofrendas o una dedicatoria especial..."
-                  style={{
-                    width: '100%', padding: '12px 14px',
-                    borderRadius: 10,
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    color: 'white', fontSize: 14, outline: 'none',
-                    boxSizing: 'border-box', fontFamily: 'Inter, sans-serif',
-                    resize: 'none', lineHeight: 1.6,
-                  }}
-                  onFocus={e => (e.target.style.borderColor = 'rgba(249,115,22,0.5)')}
-                  onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
-                />
-                <span style={{
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
-                  color: 'rgba(255,255,255,0.3)', display: 'block', textAlign: 'right', marginTop: 4,
-                }}>
-                  {mensaje.length}/300 caracteres
-                </span>
-              </div>
-
-              <button
-                type="submit"
-                disabled={enviando || !nombre.trim() || !mensaje.trim()}
-                style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  padding: '13px 20px', borderRadius: 10,
-                  background: enviando ? 'rgba(249,115,22,0.4)' : 'linear-gradient(135deg, #F97316, #C2410C)',
-                  border: 'none', color: 'white',
-                  cursor: enviando ? 'not-allowed' : 'pointer',
-                  fontFamily: 'Cinzel, serif', fontWeight: 700, fontSize: 14,
-                  boxShadow: '0 4px 18px rgba(249,115,22,0.35)',
-                  transition: 'all 0.2s',
-                  marginTop: 4,
-                }}
-              >
-                {enviando ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={15} />}
-                {enviando ? 'Publicando...' : 'Publicar en el muro'}
-              </button>
-
-              {enviadoOk && (
+            ) : !currentUser ? (
+              /* Usuario NO autenticado: Tarjeta de Invitación */
+              <div style={{
+                padding: '32px 28px',
+                borderRadius: 20,
+                border: '1px solid rgba(249,115,22,0.25)',
+                background: 'rgba(249,115,22,0.03)',
+                backdropFilter: 'blur(12px)',
+                textAlign: 'center',
+              }}>
                 <div style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '10px 14px', borderRadius: 8,
-                  background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)',
-                  color: '#34D399', fontSize: 13,
+                  width: 52, height: 52, borderRadius: '50%',
+                  background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.3)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  margin: '0 auto 16px',
                 }}>
-                  <CheckCircle2 size={16} />
-                  <span>¡Tu mensaje se ha publicado correctamente en el muro!</span>
+                  <Lock size={22} color="#F97316" />
                 </div>
-              )}
-            </form>
+
+                <h3 style={{
+                  fontFamily: 'Cinzel, serif', fontWeight: 700, fontSize: 18, color: 'white', margin: '0 0 10px',
+                }}>
+                  ¿Deseas escribir en el muro?
+                </h3>
+
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', lineHeight: 1.6, margin: '0 0 22px' }}>
+                  Inicia sesión o regístrate en segundos. Tu nombre se colocará de forma automática (tu correo nunca será público) y podrás editar o borrar tu mensaje cuando gustes.
+                </p>
+
+                <Link
+                  href="/login?returnTo=/#comunidad"
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                    width: '100%', maxWidth: 280,
+                    padding: '13px 22px', borderRadius: 12,
+                    background: 'linear-gradient(135deg, #F97316, #C2410C)',
+                    color: 'white', textDecoration: 'none',
+                    fontFamily: 'Cinzel, serif', fontWeight: 700, fontSize: 14,
+                    boxShadow: '0 4px 20px rgba(249,115,22,0.35)',
+                    transition: 'transform 0.2s',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  <User size={16} />
+                  <span>Iniciar Sesión / Registrarme</span>
+                  <ArrowRight size={15} />
+                </Link>
+              </div>
+            ) : (
+              /* Usuario SÍ autenticado: Formulario Directo */
+              <div style={{
+                padding: '28px',
+                borderRadius: 20,
+                border: '1px solid rgba(255,255,255,0.08)',
+                background: 'rgba(255,255,255,0.02)',
+                backdropFilter: 'blur(12px)',
+              }}>
+                {/* Banner de Autor */}
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '10px 14px', borderRadius: 10,
+                  background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.2)',
+                  marginBottom: 18,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{
+                      width: 24, height: 24, borderRadius: '50%',
+                      background: 'rgba(249,115,22,0.2)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <User size={13} color="#F97316" />
+                    </div>
+                    <span style={{ fontSize: 13, color: 'white' }}>
+                      Comentando como: <strong style={{ color: '#F97316' }}>{currentProfile?.full_name || currentUser.email?.split('@')[0]}</strong>
+                    </span>
+                  </div>
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontFamily: 'JetBrains Mono, monospace' }}>
+                    Privacidad protegida ✓
+                  </span>
+                </div>
+
+                <h3 style={{
+                  fontFamily: 'Cinzel, serif', fontWeight: 700, fontSize: 18, color: 'white', margin: '0 0 16px',
+                }}>
+                  Escribe tu mensaje o dedicatoria
+                </h3>
+
+                <form onSubmit={handleSubmitComment} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div>
+                    <textarea
+                      required
+                      rows={4}
+                      maxLength={300}
+                      value={mensaje}
+                      onChange={e => setMensaje(e.target.value)}
+                      placeholder="Escribe tus palabras sobre el evento, las ofrendas o una dedicatoria especial..."
+                      style={{
+                        width: '100%', padding: '12px 14px',
+                        borderRadius: 10,
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        color: 'white', fontSize: 14, outline: 'none',
+                        boxSizing: 'border-box', fontFamily: 'Inter, sans-serif',
+                        resize: 'none', lineHeight: 1.6,
+                      }}
+                      onFocus={e => (e.target.style.borderColor = 'rgba(249,115,22,0.5)')}
+                      onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
+                    />
+                    <span style={{
+                      fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+                      color: 'rgba(255,255,255,0.3)', display: 'block', textAlign: 'right', marginTop: 4,
+                    }}>
+                      {mensaje.length}/300 caracteres
+                    </span>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={enviando || !mensaje.trim()}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                      padding: '13px 20px', borderRadius: 10,
+                      background: enviando ? 'rgba(249,115,22,0.4)' : 'linear-gradient(135deg, #F97316, #C2410C)',
+                      border: 'none', color: 'white',
+                      cursor: enviando ? 'not-allowed' : 'pointer',
+                      fontFamily: 'Cinzel, serif', fontWeight: 700, fontSize: 14,
+                      boxShadow: '0 4px 18px rgba(249,115,22,0.35)',
+                      transition: 'all 0.2s',
+                      marginTop: 4,
+                    }}
+                  >
+                    {enviando ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={15} />}
+                    {enviando ? 'Publicando...' : 'Publicar en el muro'}
+                  </button>
+
+                  {enviadoOk && (
+                    <div style={{
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      padding: '10px 14px', borderRadius: 8,
+                      background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)',
+                      color: '#34D399', fontSize: 13,
+                    }}>
+                      <CheckCircle2 size={16} />
+                      <span>¡Tu mensaje se ha publicado correctamente en el muro!</span>
+                    </div>
+                  )}
+                </form>
+              </div>
+            )}
           </div>
 
-          {/* Lista de mensajes publicados */}
+          {/* Columna Derecha: Lista de mensajes publicados con opción de Editar/Eliminar */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
               <span style={{
@@ -489,6 +630,10 @@ export default function CommunityInteractions() {
                 maxHeight: 460, overflowY: 'auto', paddingRight: 4,
               }}>
                 {comentarios.map(c => {
+                  const isAuthor = currentUser && c.user_id === currentUser.id;
+                  const isAdmin  = currentProfile?.role === 'admin';
+                  const isEditing = editingId === c.id;
+
                   const dateStr = new Date(c.created_at).toLocaleDateString('es-MX', {
                     day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
                   });
@@ -499,35 +644,124 @@ export default function CommunityInteractions() {
                       style={{
                         padding: '16px 18px',
                         borderRadius: 14,
-                        border: '1px solid rgba(255,255,255,0.07)',
-                        background: 'rgba(255,255,255,0.025)',
+                        border: isAuthor ? '1px solid rgba(249,115,22,0.3)' : '1px solid rgba(255,255,255,0.07)',
+                        background: isAuthor ? 'rgba(249,115,22,0.03)' : 'rgba(255,255,255,0.025)',
                       }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <div style={{
                             width: 26, height: 26, borderRadius: '50%',
-                            background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.25)',
+                            background: isAuthor ? 'rgba(249,115,22,0.2)' : 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.1)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                           }}>
-                            <User size={13} color="#F97316" />
+                            <User size={13} color={isAuthor ? '#F97316' : 'white'} />
                           </div>
-                          <span style={{ fontWeight: 600, fontSize: 13, color: 'white' }}>
-                            {c.nombre}
-                          </span>
+                          <div>
+                            <span style={{ fontWeight: 600, fontSize: 13, color: isAuthor ? '#F97316' : 'white' }}>
+                              {c.nombre || 'Visitante'}
+                            </span>
+                            {isAuthor && (
+                              <span style={{ fontSize: 10, color: '#F97316', marginLeft: 6, fontFamily: 'JetBrains Mono, monospace' }}>
+                                (Tú)
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <span style={{
-                          fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(255,255,255,0.3)',
-                        }}>
-                          {dateStr}
-                        </span>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{
+                            fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(255,255,255,0.3)',
+                          }}>
+                            {dateStr}
+                          </span>
+
+                          {/* Botón Editar (Solo para el autor) */}
+                          {isAuthor && !isEditing && (
+                            <button
+                              onClick={() => {
+                                setEditingId(c.id);
+                                setEditingText(c.mensaje);
+                              }}
+                              title="Editar mi comentario"
+                              style={{
+                                background: 'none', border: 'none', color: 'rgba(255,255,255,0.45)',
+                                cursor: 'pointer', padding: 2, display: 'flex', alignItems: 'center',
+                              }}
+                              onMouseEnter={e => (e.currentTarget.style.color = '#F97316')}
+                              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}
+                            >
+                              <Edit2 size={13} />
+                            </button>
+                          )}
+
+                          {/* Botón Eliminar (Para el autor o el Admin) */}
+                          {(isAuthor || isAdmin) && !isEditing && (
+                            <button
+                              onClick={() => handleDeleteComment(c.id)}
+                              title={isAdmin && !isAuthor ? 'Moderar/Eliminar comentario (Admin)' : 'Eliminar mi comentario'}
+                              style={{
+                                background: 'none', border: 'none', color: 'rgba(255,255,255,0.45)',
+                                cursor: 'pointer', padding: 2, display: 'flex', alignItems: 'center',
+                              }}
+                              onMouseEnter={e => (e.currentTarget.style.color = '#F87171')}
+                              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          )}
+                        </div>
                       </div>
-                      <p style={{
-                        fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6, margin: 0,
-                        textAlign: 'justify', textJustify: 'inter-word',
-                      }}>
-                        {c.mensaje}
-                      </p>
+
+                      {/* Modo edición o vista de mensaje */}
+                      {isEditing ? (
+                        <div style={{ marginTop: 8 }}>
+                          <textarea
+                            value={editingText}
+                            onChange={e => setEditingText(e.target.value)}
+                            rows={3}
+                            style={{
+                              width: '100%', padding: '8px 10px', borderRadius: 8,
+                              background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(249,115,22,0.4)',
+                              color: 'white', fontSize: 13, outline: 'none',
+                              boxSizing: 'border-box', fontFamily: 'Inter, sans-serif',
+                            }}
+                          />
+                          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 6 }}>
+                            <button
+                              onClick={() => setEditingId(null)}
+                              style={{
+                                padding: '4px 10px', borderRadius: 6,
+                                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                                color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: 11,
+                              }}
+                            >
+                              Cancelar
+                            </button>
+                            <button
+                              onClick={() => handleSaveEdit(c.id)}
+                              disabled={savingEdit}
+                              style={{
+                                padding: '4px 12px', borderRadius: 6,
+                                background: '#F97316', border: 'none',
+                                color: 'white', cursor: 'pointer', fontSize: 11, fontWeight: 600,
+                                display: 'flex', alignItems: 'center', gap: 4,
+                              }}
+                            >
+                              {savingEdit ? <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={12} />}
+                              Guardar
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p style={{
+                          fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6, margin: 0,
+                          textAlign: 'justify', textJustify: 'inter-word',
+                        }}>
+                          {c.mensaje}
+                        </p>
+                      )}
                     </div>
                   );
                 })}

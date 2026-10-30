@@ -14,6 +14,9 @@ import AdminPrograma from './AdminPrograma';
 import AdminAnuncios from './AdminAnuncios';
 import AdminStats from './AdminStats';
 import AdminComentarios from './AdminComentarios';
+import AdminUsers from './AdminUsers';
+import AdminAlerts from './AdminAlerts';
+import { Users, Bell } from 'lucide-react';
 
 interface Props { user: User }
 
@@ -24,6 +27,8 @@ const TABS = [
   { id: 'programa',    label: 'Programa',     icon: Calendar },
   { id: 'anuncios',    label: 'Anuncios',     icon: Megaphone },
   { id: 'stats',       label: 'Estadísticas', icon: BarChart2 },
+  { id: 'users',       label: 'Usuarios/Roles',icon: Users },
+  { id: 'alerts',      label: 'Monitor/Alertas',icon: Bell },
 ];
 
 export default function AdminDashboard({ user }: Props) {
@@ -171,6 +176,8 @@ export default function AdminDashboard({ user }: Props) {
           {activeTab === 'programa'    && <AdminPrograma />}
           {activeTab === 'anuncios'    && <AdminAnuncios />}
           {activeTab === 'stats'       && <AdminStats />}
+          {activeTab === 'users'       && <AdminUsers />}
+          {activeTab === 'alerts'      && <AdminAlerts />}
         </div>
       </div>
     </div>

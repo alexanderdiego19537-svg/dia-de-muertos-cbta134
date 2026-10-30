@@ -25,6 +25,7 @@ const navItems = [
   { label: 'Galería',       tag: 'Fotografías',                  href: '/#galeria',  anchor: true },
   { label: 'Ubicación',     tag: 'Cómo llegar',                  href: '/#ubicacion',anchor: true },
   { label: 'Autores',       tag: 'Equipo de Desarrollo 5°A',     href: '/autores',   anchor: false },
+  { label: 'Mi Cuenta',     tag: 'Acceso para Visitantes y Editores', href: '/login', anchor: false },
 ];
 
 const glowOptions = [

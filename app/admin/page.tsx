@@ -8,7 +8,7 @@ export default async function AdminPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) redirect('/admin/login');
+  if (!user) redirect('/login?returnTo=/admin');
 
   // Verificar que sea admin en la tabla profiles
   const { data: profile } = await supabase
@@ -18,7 +18,7 @@ export default async function AdminPage() {
     .single();
 
   if (!profile || profile.role !== 'admin') {
-    redirect('/admin/login?error=no-admin');
+    redirect('/login?error=no-admin');
   }
 
   return <AdminDashboard user={user} />;
