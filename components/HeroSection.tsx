@@ -112,7 +112,7 @@ export default function HeroSection() {
           <>
             {/* ENTRE LA VIDA — izquierda, detrás de catrina z=5 */}
             <motion.div
-              style={{ position: 'absolute', top: '11%', left: 0, right: 0, zIndex: 5, pointerEvents: 'none', x: titlePX }}
+              style={{ position: 'absolute', top: 'clamp(84px, 11vh, 120px)', left: 0, right: 0, zIndex: 5, pointerEvents: 'none', x: titlePX }}
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.2 }}
             >
               <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px' }}>
@@ -131,7 +131,7 @@ export default function HeroSection() {
 
             {/* Y LA MUERTE — encima de catrina z=15 */}
             <motion.div
-              style={{ position: 'absolute', top: '11%', left: 0, right: 0, zIndex: 15, pointerEvents: 'none', x: titlePX }}
+              style={{ position: 'absolute', top: 'clamp(84px, 11vh, 120px)', left: 0, right: 0, zIndex: 15, pointerEvents: 'none', x: titlePX }}
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.5 }}
             >
               <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px' }}>
@@ -149,14 +149,14 @@ export default function HeroSection() {
 
         {/* ══════════════════════════════════════
             TÍTULO MÓVIL
-            — posición absoluta, top fijo para
-              que quede justo bajo el header
+            — posición absoluta con holgura para
+              evitar que el header lo tape
         ══════════════════════════════════════ */}
         {isMobile && (
           <motion.div
             style={{
               position: 'absolute',
-              top: 56,           // justo bajo el header (~56px)
+              top: 'clamp(82px, 11vh, 96px)',
               left: 0, right: 0,
               zIndex: 15,
               pointerEvents: 'none',
@@ -188,8 +188,8 @@ export default function HeroSection() {
           display: 'flex',
           alignItems: isMobile ? 'center' : 'flex-end',
           justifyContent: 'center',
-          paddingTop:    isMobile ? '160px' : '0',
-          paddingBottom: isMobile ? '120px' : '0',
+          paddingTop:    isMobile ? '180px' : '0',
+          paddingBottom: isMobile ? '110px' : '0',
         }}>
           <motion.div
             style={{ rotateY, rotateX, perspective: 1000, transformStyle: 'preserve-3d' }}

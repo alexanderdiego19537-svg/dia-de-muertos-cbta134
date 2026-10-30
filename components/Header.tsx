@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, MapPin, Globe, X, Clock, User, ShieldCheck, LogOut, ChevronDown } from 'lucide-react';
+import { Menu, Clock, User, ShieldCheck, LogOut, ChevronDown } from 'lucide-react';
 import CempasuchilLogo from './CempasuchilLogo';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
@@ -15,7 +15,6 @@ interface HeaderProps {
 
 export default function Header({ onMenuOpen, onEventOpen, onChatOpen }: HeaderProps) {
   const supabase = createClient();
-  const [showLocation, setShowLocation] = useState(false);
   const [currentTime, setCurrentTime]   = useState('');
   const [scrolled, setScrolled]         = useState(false);
   
@@ -99,49 +98,8 @@ export default function Header({ onMenuOpen, onEventOpen, onChatOpen }: HeaderPr
         <span className="font-display text-xs tracking-[0.3em] text-orange-400/80 uppercase hidden sm:block">CBT #134</span>
       </div>
 
-      {/* Right: Location + CTA buttons */}
+      {/* Right: CTA buttons + User */}
       <div className="flex items-center gap-3">
-        {/* Location tooltip */}
-        <div className="relative">
-          <button
-            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 hover:border-orange-500/50 hover:bg-orange-500/10 transition-all flex items-center justify-center text-white/50 hover:text-orange-400"
-            onClick={() => setShowLocation(!showLocation)}
-            onMouseEnter={() => setShowLocation(true)}
-            onMouseLeave={() => setShowLocation(false)}
-          >
-            <MapPin size={16} />
-          </button>
-          <AnimatePresence>
-            {showLocation && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-                className="absolute right-0 mt-3 w-72 p-5 bg-black/95 border border-white/10 rounded-2xl backdrop-blur-xl z-50"
-                onMouseEnter={() => setShowLocation(true)}
-                onMouseLeave={() => setShowLocation(false)}
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 rounded-full bg-orange-500/20 border border-orange-500/30 flex items-center justify-center">
-                    <Globe size={14} className="text-orange-400" />
-                  </div>
-                  <div>
-                    <p className="text-white font-semibold text-sm">CBT Agropecuario #134</p>
-                    <p className="text-white/50 text-xs font-mono">San Francisco Tetlanhocan</p>
-                  </div>
-                </div>
-                <p className="text-white/60 text-xs font-mono mb-3">C. Josefa Ortiz de Domínguez,<br />90840 Tetlanhocan, Tlax.</p>
-                <div className="flex items-center gap-2 text-orange-400 text-xs font-mono border-t border-white/5 pt-3">
-                  <span>LAT: 19.2616° N</span>
-                  <span className="text-white/20">|</span>
-                  <span>LNG: 98.1400° W</span>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
         <button
           onClick={onChatOpen}
           className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 hover:border-orange-500/40 bg-white/5 hover:bg-orange-500/10 text-white/60 hover:text-white transition-all text-sm"
