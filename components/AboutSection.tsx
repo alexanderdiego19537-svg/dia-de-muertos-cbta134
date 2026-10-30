@@ -42,11 +42,11 @@ export default function AboutSection({ standalone = false }: AboutSectionProps) 
             </motion.h2>
 
             <motion.p initial={{ opacity: 0, y: 20 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.2 }}
-              style={{ color: 'rgba(255,255,255,0.58)', lineHeight: 1.8, marginBottom: 16, fontSize: 15 }}>
+              style={{ color: 'rgba(255,255,255,0.58)', lineHeight: 1.8, marginBottom: 16, fontSize: 15, textAlign: 'justify', textJustify: 'inter-word' }}>
               El <strong style={{ color: 'rgba(255,255,255,0.85)' }}>Centro de Bachillerato Tecnológico Agropecuario #134</strong> de San Francisco Tetlanhocan, Tlaxcala, es una institución educativa de nivel medio superior comprometida con la formación integral de sus estudiantes y la preservación de la cultura regional.
             </motion.p>
             <motion.p initial={{ opacity: 0, y: 20 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.3 }}
-              style={{ color: 'rgba(255,255,255,0.42)', lineHeight: 1.8, marginBottom: 32, fontSize: 14 }}>
+              style={{ color: 'rgba(255,255,255,0.42)', lineHeight: 1.8, marginBottom: 32, fontSize: 14, textAlign: 'justify', textJustify: 'inter-word' }}>
               Alineados al Programa Aula-Escuela-Comunidad <strong style={{ color: 'rgba(255,255,255,0.6)' }}>(PAEC)</strong>, promovemos actividades académicas y culturales que fortalecen la identidad de la comunidad, como esta celebración del Día de Muertos.
             </motion.p>
 

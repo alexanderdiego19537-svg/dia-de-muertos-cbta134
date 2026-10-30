@@ -3,7 +3,7 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import Image from 'next/image';
-import { Code2, Database, GitBranch, CheckCircle2 } from 'lucide-react';
+import { Code2, Database, GitBranch, CheckCircle2, Target } from 'lucide-react';
 
 interface AuthorsSectionProps {
   standalone?: boolean;
@@ -11,9 +11,9 @@ interface AuthorsSectionProps {
 
 const AUTORES = [
   {
-    nombre: 'Diego Alexander Zecua Zecua',
-    rol: 'Desarrollador Full-Stack & UI/UX',
-    tag: 'Desarrollo & Diseño',
+    nombre: 'Diego Alexander',
+    rol: 'Desarrollador',
+    tag: 'Desarrollo Full-Stack',
     icon: Code2,
     color: '#F97316',
     semestre: '5to Semestre "A" · Programación',
@@ -22,40 +22,40 @@ const AUTORES = [
     aportes: [
       'Arquitectura de componentes y responsive design',
       'Integración de base de datos, Storage y seguridad RLS',
-      'Desarrollo del panel de control de administración',
+      'Desarrollo del panel de control de administración y editor',
       'Despliegue y configuración CI/CD en Vercel',
     ],
   },
   {
-    nombre: 'Milca Antonio',
-    rol: 'Analista de Sistemas & Documentación',
-    tag: 'Análisis & Modelado',
-    icon: Database,
+    nombre: 'Milca',
+    rol: 'Scrum Master',
+    tag: 'Gestión Ágil & Scrum',
+    icon: GitBranch,
     color: '#EAB308',
     semestre: '5to Semestre "A" · Programación',
     descripcion:
-      'Análisis de requerimientos de software y elaboración del reporte documental del proyecto bajo metodología Scrum. Modelado conceptual de la estructura de datos.',
+      'Coordinación ágil del equipo de desarrollo bajo metodología Scrum. Facilitación de sprints, seguimiento de tareas del proyecto y elaboración del reporte documental técnico.',
     aportes: [
-      'Elaboración del reporte técnico del proyecto (Scrum)',
-      'Diseño de diagramas Entidad-Relación (E-R)',
-      'Levantamiento y especificación de requerimientos',
+      'Facilitación de sprints y coordinación del equipo (Scrum)',
+      'Elaboración del reporte técnico y documental del proyecto',
+      'Seguimiento del backlog y cumplimiento de entregables',
       'Documentación de pruebas y casos de uso',
     ],
   },
   {
     nombre: 'Guadalupe',
-    rol: 'Scrum Master & Arquitectura',
-    tag: 'Gestión Ágil & Diseño',
-    icon: GitBranch,
+    rol: 'Product Owner',
+    tag: 'Product Owner & Visión',
+    icon: Target,
     color: '#A855F7',
     semestre: '5to Semestre "A" · Programación',
     descripcion:
-      'Coordinación ágil del equipo como Scrum Master. Co-elaboración del reporte documental, diagramación de arquitectura de frameworks y colaboración en el diseño visual.',
+      'Definición y priorización del Product Backlog, levantamiento y análisis de requerimientos del sistema, y validación de entregables para asegurar los objetivos del evento.',
     aportes: [
-      'Facilitación de sprints y coordinación del equipo (Scrum)',
-      'Co-elaboración y validación del reporte de proyecto',
-      'Diagramas de arquitectura funcional y de frameworks',
-      'Colaboración en diseño visual y armonía de interfaz',
+      'Definición de visión del producto y criterios de aceptación',
+      'Priorización del Product Backlog según necesidades del festival',
+      'Levantamiento y especificación de requerimientos funcionales',
+      'Validación y pruebas de aceptación del usuario',
     ],
   },
 ];

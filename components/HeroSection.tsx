@@ -110,9 +110,9 @@ export default function HeroSection() {
         ══════════════════════════════════════ */}
         {!isMobile && (
           <>
-            {/* ENTRE LA VIDA — izquierda, detrás de catrina z=5 */}
+            {/* ENTRE LA VIDA — izquierda, delante de catrina z=15 para que 'LA' nunca quede oculta */}
             <motion.div
-              style={{ position: 'absolute', top: 'clamp(84px, 11vh, 120px)', left: 0, right: 0, zIndex: 5, pointerEvents: 'none', x: titlePX }}
+              style={{ position: 'absolute', top: 'clamp(84px, 11vh, 120px)', left: 0, right: 0, zIndex: 15, pointerEvents: 'none', x: titlePX }}
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.2 }}
             >
               <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px' }}>

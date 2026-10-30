@@ -287,6 +287,8 @@ export default function EventoPage() {
               lineHeight: 1.8,
               fontSize: 'clamp(14px,1.8vw,17px)',
               color: 'rgba(255,255,255,0.75)',
+              textAlign: 'justify',
+              textJustify: 'inter-word',
             }}>
               <p style={{ margin: '0 0 16px' }}>
                 El <strong style={{ color: '#F97316' }}>Festival Entre la Vida y la Muerte</strong> es una celebración cultural organizada por el <strong style={{ color: '#EAB308' }}>Centro de Bachillerato Tecnológico Agropecuario No. 134</strong> de San Francisco Tetlanohcan, Tlaxcala, como parte del Programa Aula-Escuela-Comunidad (PAEC).

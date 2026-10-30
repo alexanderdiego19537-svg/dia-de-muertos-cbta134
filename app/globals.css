@@ -144,13 +144,23 @@ html { scroll-behavior: smooth; }
   color: white;
 }
 
-/* ── Centrar texto en secciones de contenido público ── */
-section p,
-section h2,
-section h3,
-section h4,
-section h5,
-section h6,
-section li {
-  text-align: center;
+/* ── Tipografía, justificación e interlineado óptimo sin distorsión ── */
+p {
+  line-height: 1.75;
+  text-wrap: pretty;
+}
+
+/* Textos narrativos y descriptivos con justificación armónica */
+.text-justified,
+.text-editorial,
+article p {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  line-height: 1.8;
+}
+
+/* Listas con alineación natural a la izquierda */
+ul, ol {
+  text-align: left;
 }
