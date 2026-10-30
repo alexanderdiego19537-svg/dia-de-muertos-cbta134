@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import CempasuchilLogo from './CempasuchilLogo';
 
 const socials = [
@@ -147,9 +148,29 @@ export default function Footer() {
             ))}
           </div>
 
-          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(255,255,255,0.12)', marginTop: 4, textAlign: 'center', lineHeight: 1.6 }}>
-            Desarrollado con 💀 por Diego Alexander Zecua Zecua · Actividad PAEC 2026 · Tetlanhocan, Tlaxcala
-          </p>
+          <div style={{ marginTop: 8, textAlign: 'center' }}>
+            <Link
+              href="/autores"
+              style={{
+                fontFamily: 'JetBrains Mono, monospace',
+                fontSize: 11,
+                color: '#F97316',
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 14px',
+                borderRadius: 999,
+                background: 'rgba(249,115,22,0.08)',
+                border: '1px solid rgba(249,115,22,0.25)',
+              }}
+            >
+              👨‍💻 Conoce al Equipo de Autores (5° &quot;A&quot; Programación) →
+            </Link>
+            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(255,255,255,0.25)', marginTop: 8, margin: '8px 0 0', lineHeight: 1.6 }}>
+              Desarrollado con 💀 por Diego Alexander, Milca Antonio y Guadalupe · PAEC 2026 · Tetlanhocan, Tlaxcala
+            </p>
+          </div>
         </div>
       </div>
     </footer>

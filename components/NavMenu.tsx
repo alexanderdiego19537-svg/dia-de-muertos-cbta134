@@ -24,6 +24,7 @@ const navItems = [
   { label: 'Evento',        tag: 'Fotos y Videos del Festival',  href: '/evento',    anchor: false },
   { label: 'Galería',       tag: 'Fotografías',                  href: '/#galeria',  anchor: true },
   { label: 'Ubicación',     tag: 'Cómo llegar',                  href: '/#ubicacion',anchor: true },
+  { label: 'Autores',       tag: 'Equipo de Desarrollo 5°A',     href: '/autores',   anchor: false },
 ];
 
 const glowOptions = [

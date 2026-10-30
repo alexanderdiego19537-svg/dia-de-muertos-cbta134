@@ -10,6 +10,7 @@ export default function UbicacionPage() {
   return (
     <PageLayout
       prevPage={{ href: '/galeria', label: 'Galería' }}
+      nextPage={{ href: '/autores', label: 'Autores' }}
       showFooter
     >
       <LocationSection standalone />

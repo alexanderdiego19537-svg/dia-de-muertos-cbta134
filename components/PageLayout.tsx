@@ -22,6 +22,7 @@ const PAGES = [
   { href: '/evento',       label: 'Evento' },
   { href: '/galeria',      label: 'Galería' },
   { href: '/ubicacion',    label: 'Ubicación' },
+  { href: '/autores',      label: 'Autores' },
 ];
 
 interface PageLayoutProps {
