@@ -28,18 +28,29 @@ export async function updateSession(request: NextRequest) {
   // Refrescar sesión — IMPORTANTE: no agregar lógica entre aquí y el return
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Proteger rutas /admin/* (excepto /admin/login)
+  // Proteger rutas /admin/* y /editor/*
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
-  const isLoginPage  = request.nextUrl.pathname === '/admin/login';
+  const isEditorRoute = request.nextUrl.pathname.startsWith('/editor');
+  const isAdminLoginPage = request.nextUrl.pathname === '/admin/login';
+  const isGeneralLoginPage = request.nextUrl.pathname === '/login';
 
-  if (isAdminRoute && !isLoginPage && !user) {
+  // Si intenta entrar a /admin (no login) y no está autenticado → redirigir a /admin/login
+  if (isAdminRoute && !isAdminLoginPage && !user) {
     const url = request.nextUrl.clone();
     url.pathname = '/admin/login';
     return NextResponse.redirect(url);
   }
 
-  // Si ya está logueado y va a login → redirigir al panel
-  if (isLoginPage && user) {
+  // Si intenta entrar a /editor y no está autenticado → redirigir a /login con returnTo
+  if (isEditorRoute && !user) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/login';
+    url.searchParams.set('returnTo', '/editor');
+    return NextResponse.redirect(url);
+  }
+
+  // Si ya está logueado y va a login de admin → redirigir al panel
+  if (isAdminLoginPage && user) {
     const url = request.nextUrl.clone();
     url.pathname = '/admin';
     return NextResponse.redirect(url);
