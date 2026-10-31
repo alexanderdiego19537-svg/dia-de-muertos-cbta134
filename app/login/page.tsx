@@ -228,6 +228,16 @@ function LoginFormContent() {
         return;
       }
 
+      // Si el correo ya estaba registrado previamente en Supabase (identities vacío)
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        setError(
+          `El correo ${email.trim()} YA está registrado en el sistema. Por favor pasa a la pestaña "Iniciar Sesión" arriba e ingresa tu contraseña.`
+        );
+        setMode('login');
+        setLoading(false);
+        return;
+      }
+
       if (data.user) {
         // Asegurar registro del perfil en Supabase
         try {
