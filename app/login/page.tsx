@@ -229,7 +229,7 @@ function LoginFormContent() {
       }
 
       if (data.user) {
-        // Asegurar registro del perfil
+        // Asegurar registro del perfil en Supabase
         try {
           await supabase.from('profiles').upsert({
             id: data.user.id,
@@ -239,22 +239,13 @@ function LoginFormContent() {
           });
         } catch {}
 
-        // Caso A: Supabase requiere confirmación de correo (práctica profesional obligatoria)
-        if (!data.session) {
-          setSuccess(`¡Cuenta creada! Enviamos un código de verificación a ${email.trim()}.`);
-          setMode('verify-otp');
-          setResendCooldown(45);
-        } else {
-          // Caso B: Sesión activa inmediata
-          setSuccess('¡Cuenta creada con éxito! Entrando...');
-          setTimeout(() => {
-            if (initialRole === 'editor') {
-              router.push('/editor');
-            } else {
-              router.push(returnTo || '/');
-            }
-          }, 800);
-        }
+        // Cerrar cualquier sesión automática para impedir acceso sin verificar el correo
+        await supabase.auth.signOut();
+
+        // OBLIGATORIO: Pasar a la pantalla de verificación de código OTP (6 dígitos)
+        setSuccess(`¡Cuenta registrada! Enviamos un código de verificación a ${email.trim()}. Revisa tu bandeja de entrada o spam para activar tu cuenta.`);
+        setMode('verify-otp');
+        setResendCooldown(45);
       }
     } catch (err: unknown) {
       console.error(err);
