@@ -239,14 +239,38 @@ function LoginFormContent() {
       }
 
       if (data.user) {
-        // Cerrar cualquier sesión automática para impedir acceso sin verificar el correo
-        await supabase.auth.signOut();
+        // Opción A: Guardar y activar perfil inmediatamente
+        try {
+          await supabase.from('profiles').upsert({
+            id: data.user.id,
+            email: data.user.email || email.trim().toLowerCase(),
+            full_name: fullName.trim(),
+            role: initialRole,
+          });
+        } catch (e) {
+          console.error('Error guardando perfil:', e);
+        }
 
-        // OBLIGATORIO: Pasar a la pantalla de verificación de código OTP (6 dígitos)
-        // NOTA: NO se guarda nada en 'profiles' hasta que el usuario ingrese el código real.
-        setSuccess(`¡Código enviado! Revisa tu correo ${email.trim()} (bandeja de entrada o spam) e ingresa los 6 dígitos para verificar tu cuenta.`);
-        setMode('verify-otp');
-        setResendCooldown(45);
+        // Si la sesión no vino activa automáticamente, iniciamos sesión con las credenciales ingresadas
+        if (!data.session) {
+          try {
+            await supabase.auth.signInWithPassword({
+              email: email.trim().toLowerCase(),
+              password,
+            });
+          } catch (e) {
+            console.error('Error iniciando sesión tras registro:', e);
+          }
+        }
+
+        setSuccess(`¡Bienvenido, ${fullName.trim()}! Tu cuenta ha sido creada exitosamente. Ingresando...`);
+        setTimeout(() => {
+          if (initialRole === 'editor') {
+            router.push('/editor');
+          } else {
+            router.push(returnTo || '/');
+          }
+        }, 900);
       }
     } catch (err: unknown) {
       console.error(err);
@@ -1146,6 +1170,23 @@ function LoginFormContent() {
                 }}
               >
                 Cambiar correo
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('login');
+                  setError('');
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#F97316',
+                  cursor: 'pointer',
+                  padding: 0,
+                }}
+              >
+                Iniciar Sesión
               </button>
             </div>
           </form>

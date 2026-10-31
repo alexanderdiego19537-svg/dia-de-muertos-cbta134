@@ -21,6 +21,8 @@ const DUMMY_USERNAMES = new Set([
   'nobody', 'nada', 'correo', 'admin', 'root', 'invitado', 'guest',
   'temporal', 'dummy', 'anonimo', 'anonymous', 'ejemplo1', 'ejemplo2',
   'prueba1', 'prueba2', 'test1', 'test2', '12345', '123456', 'correo1',
+  'averrr', 'aversiya', 'aver', 'vegeta', 'holaaseca', 'falso123',
+  'random', 'testuser', 'fakeuser', 'correoprueba', 'probando', 'probando1',
 ]);
 
 // Errores tipográficos comunes en dominios populares y su sugerencia
@@ -85,7 +87,7 @@ export function validateEmail(email: string): EmailValidationResult {
   // 2.1 Bloqueo de nombres de usuario ficticios, de ejemplo o prueba
   if (
     DUMMY_USERNAMES.has(local) ||
-    /^(ejemplo|prueba|test|fake|asdf|qwerty)\d*$/i.test(local)
+    /^(ejemplo|prueba|test|testing|fake|falso|asdf|qwerty|correo|usuario|probando)\d*$/i.test(local)
   ) {
     return {
       valid: false,
