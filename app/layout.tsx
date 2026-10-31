@@ -4,6 +4,7 @@ import PetalRain from "@/components/PetalRain";
 import VisitorTracker from "@/components/VisitorTracker";
 import EditorBar from "@/components/editor/EditorBar";
 import CookieBanner from "@/components/CookieBanner";
+import AnunciosBanner from "@/components/AnunciosBanner";
 
 export const metadata: Metadata = {
   title: "Día de Muertos 2026 — CBTA #134 Tetlanhocan, Tlaxcala",
@@ -41,6 +42,8 @@ export default function RootLayout({
         <VisitorTracker />
         {/* Banner de consentimiento legal de cookies LFPDPPP */}
         <CookieBanner />
+        {/* Banner superior de avisos y anuncios oficiales */}
+        <AnunciosBanner />
         {/* Barra de herramientas para editores en la misma página */}
         <EditorBar />
         {children}

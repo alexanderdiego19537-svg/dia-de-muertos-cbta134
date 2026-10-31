@@ -103,7 +103,7 @@ export default function ProgramaSection({ standalone = false }: ProgramaSectionP
         const { data, error } = await supabase
           .from('programa')
           .select('*')
-          .eq('visible', true)
+          .neq('visible', false)
           .order('orden', { ascending: true });
 
         if (!error && data && data.length > 0) {

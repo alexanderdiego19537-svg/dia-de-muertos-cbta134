@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import PageLayout from '@/components/PageLayout';
 import ProgramaSection from '@/components/ProgramaSection';
+import AnunciosSection from '@/components/AnunciosSection';
 
 export const metadata: Metadata = {
   title: 'Programa del Festival — CBTA #134',
@@ -14,6 +15,7 @@ export default function ProgramaPage() {
       nextPage={{ href: '/concurso', label: 'Concurso' }}
     >
       <ProgramaSection standalone />
+      <AnunciosSection />
     </PageLayout>
   );
 }
