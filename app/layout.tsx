@@ -81,7 +81,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+    google: "lCKeR42IO1yUIKCqn8IfQpFXtAxKPeZMem_MDti8OSk",
   },
 };
 
@@ -93,6 +93,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
+        <meta name="google-site-verification" content="lCKeR42IO1yUIKCqn8IfQpFXtAxKPeZMem_MDti8OSk" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* Marcado Estructurado Schema.org JSON-LD (Paso 8: SEO) */}
