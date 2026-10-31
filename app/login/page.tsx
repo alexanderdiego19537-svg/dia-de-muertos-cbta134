@@ -239,21 +239,12 @@ function LoginFormContent() {
       }
 
       if (data.user) {
-        // Asegurar registro del perfil en Supabase
-        try {
-          await supabase.from('profiles').upsert({
-            id: data.user.id,
-            email: data.user.email,
-            full_name: fullName.trim(),
-            role: initialRole,
-          });
-        } catch {}
-
         // Cerrar cualquier sesión automática para impedir acceso sin verificar el correo
         await supabase.auth.signOut();
 
         // OBLIGATORIO: Pasar a la pantalla de verificación de código OTP (6 dígitos)
-        setSuccess(`¡Cuenta registrada! Enviamos un código de verificación a ${email.trim()}. Revisa tu bandeja de entrada o spam para activar tu cuenta.`);
+        // NOTA: NO se guarda nada en 'profiles' hasta que el usuario ingrese el código real.
+        setSuccess(`¡Código enviado! Revisa tu correo ${email.trim()} (bandeja de entrada o spam) e ingresa los 6 dígitos para verificar tu cuenta.`);
         setMode('verify-otp');
         setResendCooldown(45);
       }
@@ -294,6 +285,21 @@ function LoginFormContent() {
       }
 
       if (data.session) {
+        // AHORA SÍ: El correo fue verificado con éxito por el usuario real. Guardar perfil oficial.
+        try {
+          const userObj = data.user || data.session.user;
+          const userMetaName = userObj.user_metadata?.full_name;
+          const userMetaRole = userObj.user_metadata?.role;
+          await supabase.from('profiles').upsert({
+            id: userObj.id,
+            email: userObj.email || email.trim().toLowerCase(),
+            full_name: fullName.trim() || userMetaName || 'Usuario',
+            role: roleIntent === 'editor' ? 'editor' : (userMetaRole || 'user'),
+          });
+        } catch (e) {
+          console.error('Error saving profile after verification:', e);
+        }
+
         setSuccess('¡Correo verificado con éxito! Ingresando...');
         setTimeout(() => {
           if (roleIntent === 'editor') {
