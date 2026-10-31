@@ -65,22 +65,41 @@ export default function AdminVideos() {
     loadVideos();
   }, []);
 
-  // Subir archivo MP4 corto directamente a Supabase Storage
+  // Subir archivo de video directamente a Supabase Storage (hasta 50 MB)
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('video/')) {
-      showToast('err', 'Por favor selecciona un archivo de video (MP4, WEBM).');
+    // Aceptar cualquier formato de video común (MP4, MOV de iPhone, WEBM, M4V)
+    if (!file.type.startsWith('video/') && !file.name.match(/\.(mp4|mov|webm|m4v|avi|mkv)$/i)) {
+      showToast('err', 'Por favor selecciona un archivo de video válido (MP4, MOV, WEBM).');
       return;
     }
 
-    if (file.size > 30 * 1024 * 1024) {
-      showToast('err', 'El video supera 30 MB. Para clips cortos se recomienda un archivo de hasta 25 MB.');
+    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+
+    // Límite de carga directa: 50 MB (máximo admitido por el almacenamiento de Supabase)
+    if (file.size > 50 * 1024 * 1024) {
+      showToast('err', `Tu video pesa ${sizeMB} MB y supera los 50 MB del servidor. Reenvíatelo por WhatsApp para comprimirlo a ~4 MB sin perder calidad.`);
       return;
     }
 
     setUploading(true);
+
+    // Calcular duración automática si es posible
+    try {
+      const tempVideo = document.createElement('video');
+      tempVideo.preload = 'metadata';
+      tempVideo.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(tempVideo.src);
+        const sec = Math.round(tempVideo.duration);
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        setDuracion(`${m}:${s < 10 ? '0' : ''}${s}`);
+      };
+      tempVideo.src = URL.createObjectURL(file);
+    } catch {}
+
     const cleanName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     const fileName = `video-${Date.now()}-${cleanName}`;
 
@@ -89,7 +108,7 @@ export default function AdminVideos() {
       .upload(fileName, file, { cacheControl: '3600', upsert: false });
 
     if (storageError) {
-      showToast('err', `Error al subir video: ${storageError.message}`);
+      showToast('err', `Error al subir video (${sizeMB} MB): ${storageError.message}`);
       setUploading(false);
       return;
     }
@@ -100,7 +119,7 @@ export default function AdminVideos() {
       setTitulo(file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '));
     }
     setUploading(false);
-    showToast('ok', 'Archivo de video cargado con éxito ✓');
+    showToast('ok', `Video cargado con éxito (${sizeMB} MB) ✓`);
   }
 
   // Subir imagen de portada para el video
@@ -274,7 +293,7 @@ export default function AdminVideos() {
 
           <div>
             <label style={{ display: 'block', fontSize: 11, fontFamily: 'JetBrains Mono, monospace', color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>
-              Archivo de Video (Sube un MP4 o pega un enlace):
+              Archivo de Video (Sube un archivo o pega un enlace):
             </label>
             <div style={{ display: 'flex', gap: 8 }}>
               <input
@@ -300,15 +319,22 @@ export default function AdminVideos() {
                 }}
               >
                 <Upload size={14} />
-                <span>{uploading ? 'Subiendo...' : 'Subir MP4'}</span>
+                <span>{uploading ? 'Subiendo video...' : 'Subir Video'}</span>
               </button>
               <input
                 ref={fileRef}
                 type="file"
-                accept="video/mp4,video/webm"
+                accept="video/mp4,video/quicktime,video/webm,video/x-m4v,video/*"
                 onChange={handleFileUpload}
                 style={{ display: 'none' }}
               />
+            </div>
+            <div style={{
+              marginTop: 6, padding: '6px 10px', borderRadius: 8,
+              background: 'rgba(249,115,22,0.05)', border: '1px dashed rgba(249,115,22,0.25)',
+              fontSize: 11, color: 'rgba(255,255,255,0.65)', lineHeight: 1.5,
+            }}>
+              💡 <strong>Límite: hasta 50 MB</strong> (MP4, MOV de iPhone, WEBM). Si tu celular grabó en 4K y supera los 50 MB, reenvíatelo por WhatsApp para comprimirlo a ~4 MB en alta definición al instante.
             </div>
           </div>
 
