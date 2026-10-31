@@ -14,6 +14,15 @@ const DISPOSABLE_DOMAINS = new Set([
   'mytemp.email', 'tempail.com', 'inboxkitten.com', 'crazymailing.com',
 ]);
 
+// Lista de nombres de usuario de prueba o falsos que nunca deben permitirse
+const DUMMY_USERNAMES = new Set([
+  'ejemplo', 'prueba', 'test', 'testing', 'fake', 'falso', 'correofalso',
+  'asdf', 'asdfgh', 'qwerty', 'usuario', 'user', 'demo', 'sample',
+  'nobody', 'nada', 'correo', 'admin', 'root', 'invitado', 'guest',
+  'temporal', 'dummy', 'anonimo', 'anonymous', 'ejemplo1', 'ejemplo2',
+  'prueba1', 'prueba2', 'test1', 'test2', '12345', '123456', 'correo1',
+]);
+
 // Errores tipográficos comunes en dominios populares y su sugerencia
 const COMMON_TYPOS: Record<string, string> = {
   'gmai.com': 'gmail.com',
@@ -71,6 +80,25 @@ export function validateEmail(email: string): EmailValidationResult {
   }
   if (domain.length < 4 || domain.length > 255) {
     return { valid: false, error: 'El dominio del correo electrónico no es válido.' };
+  }
+
+  // 2.1 Bloqueo de nombres de usuario ficticios, de ejemplo o prueba
+  if (
+    DUMMY_USERNAMES.has(local) ||
+    /^(ejemplo|prueba|test|fake|asdf|qwerty)\d*$/i.test(local)
+  ) {
+    return {
+      valid: false,
+      error: 'No se permiten correos de ejemplo o prueba (como "ejemplo@", "prueba@", "test@"). Por favor ingresa tu correo electrónico personal real.',
+    };
+  }
+
+  // 2.2 Bloqueo de secuencias o caracteres repetitivos falsos (ej. "aaaaa@...", "11111@...")
+  if (/^(.)\1{4,}$/.test(local)) {
+    return {
+      valid: false,
+      error: 'El correo ingresado no parece ser una dirección personal real. Por favor escribe tu correo activo.',
+    };
   }
 
   // 3. Verificación de terminación TLD (extensión)
