@@ -1,0 +1,23 @@
+{
+  "name": "Entre la Vida y la Muerte · CBTA #134",
+  "short_name": "CBTA #134",
+  "description": "Portal oficial del Festival Cultural Entre la Vida y la Muerte 2026 del CBTA #134 en San Francisco Tetlanohcan, Tlaxcala. Concurso de ofrendas, desfile de catrinas y tradiciones.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080208",
+  "theme_color": "#F97316",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

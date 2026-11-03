@@ -1,4 +1,23 @@
 export default function StructuredData() {
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Entre la Vida y la Muerte · CBTA #134',
+    alternateName: [
+      'CBTA 134',
+      'Entre la Vida y la Muerte CBTA 134',
+      'CBTA #134 Tetlanhocan',
+      'Día de Muertos CBTA 134',
+      'Festival Entre la Vida y la Muerte',
+    ],
+    url: 'https://dia-de-muertos-cbta134.vercel.app',
+    description:
+      'Portal oficial del Festival Cultural Entre la Vida y la Muerte 2026 del CBTA #134 en San Francisco Tetlanohcan, Tlaxcala. Concurso de ofrendas, desfile de catrinas y tradiciones.',
+    image: 'https://dia-de-muertos-cbta134.vercel.app/images/og-preview.jpg',
+    thumbnailUrl: 'https://dia-de-muertos-cbta134.vercel.app/images/og-preview.jpg',
+    inLanguage: 'es-MX',
+  };
+
   const eventSchema = {
     '@context': 'https://schema.org',
     '@type': 'Event',
@@ -21,7 +40,10 @@ export default function StructuredData() {
         addressCountry: 'MX',
       },
     },
-    image: ['https://dia-de-muertos-cbta134.vercel.app/images/catrina-candle.jpg'],
+    image: [
+      'https://dia-de-muertos-cbta134.vercel.app/images/og-preview.jpg',
+      'https://dia-de-muertos-cbta134.vercel.app/images/catrina-candle.jpg',
+    ],
     organizer: {
       '@type': 'EducationalOrganization',
       name: 'Centro de Bachillerato Tecnológico Agropecuario No. 134 (CBTA #134)',
@@ -42,6 +64,8 @@ export default function StructuredData() {
     name: 'CBTA #134 San Francisco Tetlanohcan',
     alternateName: 'Centro de Bachillerato Tecnológico Agropecuario No. 134',
     url: 'https://dia-de-muertos-cbta134.vercel.app',
+    logo: 'https://dia-de-muertos-cbta134.vercel.app/icon.png',
+    image: 'https://dia-de-muertos-cbta134.vercel.app/images/og-preview.jpg',
     address: {
       '@type': 'PostalAddress',
       addressLocality: 'San Francisco Tetlanohcan',
@@ -52,6 +76,10 @@ export default function StructuredData() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}

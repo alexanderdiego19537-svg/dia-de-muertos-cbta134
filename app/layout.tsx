@@ -17,20 +17,24 @@ const siteUrl =
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  applicationName: "Entre la Vida y la Muerte · CBTA #134",
   title: {
-    default: "Día de Muertos 2026 — CBTA #134 Tetlanhocan, Tlaxcala",
-    template: "%s | CBTA #134 Tetlanhocan",
+    default: "Entre la Vida y la Muerte · CBTA #134 — Festival Día de Muertos 2026",
+    template: "%s | Entre la Vida y la Muerte · CBTA #134",
   },
   description:
-    "Celebración cultural del Día de Muertos en el Centro de Bachillerato Tecnológico Agropecuario #134 de San Francisco Tetlanohcan, Tlaxcala. Miércoles 28 de octubre de 2026. Concurso de catrinas, desfile y ofrendas tradicionales.",
+    "Celebración cultural del Día de Muertos en el Centro de Bachillerato Tecnológico Agropecuario #134 de San Francisco Tetlanohcan, Tlaxcala. Concurso de ofrendas, desfile de catrinas y tradiciones.",
   keywords: [
-    "Día de Muertos",
+    "Entre la Vida y la Muerte",
     "CBTA 134",
     "CBT 134",
+    "CBTA #134",
+    "Día de Muertos",
     "Tetlanhocan",
     "Tetlanohcan",
     "Tlaxcala",
     "evento cultural",
+    "concurso de ofrendas",
     "catrinas",
     "ofrendas",
     "PAEC",
@@ -39,24 +43,33 @@ export const metadata: Metadata = {
   authors: [{ name: "Diego Alexander" }, { name: "Comité CBTA #134" }],
   creator: "CBTA #134",
   publisher: "CBTA #134 Tetlanhocan",
+  manifest: "/manifest.json",
   alternates: {
     canonical: "/",
   },
   icons: {
-    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💀</text></svg>",
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
   openGraph: {
-    title: "Día de Muertos 2026 — CBTA #134 Tetlanhocan",
+    title: "Entre la Vida y la Muerte · CBTA #134",
     description:
-      "Celebración cultural del Día de Muertos. Miércoles 28 de octubre, 8:00 AM – 1:30 PM. Auditorio de Aquiahuac, Tetlanhocan, Tlaxcala. Desfile, concurso de catrinas y montaje de ofrendas.",
+      "Festival cultural del Día de Muertos en San Francisco Tetlanohcan, Tlaxcala. Concurso de ofrendas, desfile de catrinas, música y altares tradicionales.",
     url: "/",
-    siteName: "CBTA #134 — Festival Día de Muertos 2026",
+    siteName: "Entre la Vida y la Muerte · CBTA #134",
     images: [
       {
-        url: "/images/catrina-candle.jpg",
+        url: "/images/og-preview.jpg",
         width: 1200,
         height: 630,
-        alt: "Catrina con vela — Festival CBTA #134",
+        alt: "Entre la Vida y la Muerte · CBTA #134 — Festival Día de Muertos 2026",
       },
     ],
     locale: "es_MX",
@@ -64,10 +77,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Día de Muertos 2026 — CBTA #134 Tetlanhocan",
+    title: "Entre la Vida y la Muerte · CBTA #134",
     description:
-      "Festival cultural del Día de Muertos en San Francisco Tetlanohcan, Tlaxcala. Desfile, catrinas y ofrendas tradicionales.",
-    images: ["/images/catrina-candle.jpg"],
+      "Festival cultural del Día de Muertos en San Francisco Tetlanohcan, Tlaxcala. Concurso de ofrendas, desfile de catrinas y altares.",
+    images: ["/images/og-preview.jpg"],
   },
   robots: {
     index: true,
@@ -94,6 +107,7 @@ export default function RootLayout({
     <html lang="es">
       <head>
         <meta name="google-site-verification" content="lCKeR42IO1yUIKCqn8IfQpFXtAxKPeZMem_MDti8OSk" />
+        <meta name="thumbnail" content="https://dia-de-muertos-cbta134.vercel.app/images/og-preview.jpg" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* Marcado Estructurado Schema.org JSON-LD (Paso 8: SEO) */}
